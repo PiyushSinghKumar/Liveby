@@ -6,6 +6,7 @@ import {
   getStandards, saveStandards,
   getCheckins, saveCheckins,
   getAffirmations, saveAffirmations,
+  getPenalties, savePenalties,
   todayKey,
 } from '@/lib/storage'
 import CategoryCard from '@/components/CategoryCard'
@@ -38,7 +39,7 @@ function computeStreaks(checkins: CheckinsData, standardIds: string[], today: st
 
 
 type ModalState =
-  | { type: 'edit'; categoryId: string; standardId: string; text: string }
+  | { type: 'edit'; categoryId: string; standardId: string; text: string; promiseType: 'hard' | 'soft' }
   | { type: 'add'; categoryId: string }
   | null
 
@@ -46,15 +47,21 @@ export default function Home() {
   const [standards, setStandards] = useState<StandardsData | null>(null)
   const [checkins, setCheckins] = useState<CheckinsData>({})
   const [affirmations, setAffirmations] = useState<Affirmation[]>([])
+  const [penalties, setPenalties] = useState<Record<string, number>>({})
   const [modal, setModal] = useState<ModalState>(null)
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
   const [tab, setTab] = useState<'today' | 'calendar'>('today')
-  const [confirm, setConfirm] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null)
+  const [confirm, setConfirm] = useState<{
+    title: string; message: string; confirmLabel?: string; onConfirm: () => void
+    secondaryAction?: { label: string; onAction: () => void; className?: string }
+  } | null>(null)
 
   useEffect(() => {
     setStandards(getStandards())
     setCheckins(getCheckins())
     setAffirmations(getAffirmations())
+    setPenalties(getPenalties())
   }, [])
 
   const [today, setToday] = useState(todayKey)
@@ -89,17 +96,18 @@ export default function Home() {
   }, [])
 
   function handleEditStandard(categoryId: string, standardId: string, text: string) {
-    setModal({ type: 'edit', categoryId, standardId, text })
+    const current = standards?.categories.flatMap(c => c.standards).find(s => s.id === standardId)
+    setModal({ type: 'edit', categoryId, standardId, text, promiseType: current?.type ?? 'hard' })
   }
 
-  function handleSaveEdit(newText: string) {
+  function handleSaveEdit(newText: string, promiseType: 'hard' | 'soft') {
     if (!standards || modal?.type !== 'edit') return
     handleSaveStandards({
       categories: standards.categories.map(cat =>
         cat.id !== modal.categoryId ? cat : {
           ...cat,
           standards: cat.standards.map(s =>
-            s.id !== modal.standardId ? s : { ...s, text: newText }
+            s.id !== modal.standardId ? s : { ...s, text: newText, type: promiseType }
           ),
         }
       ),
@@ -110,9 +118,9 @@ export default function Home() {
     setModal({ type: 'add', categoryId })
   }
 
-  function handleSaveAdd(text: string) {
+  function handleSaveAdd(text: string, promiseType: 'hard' | 'soft') {
     if (!standards || modal?.type !== 'add') return
-    const newStandard: Standard = { id: `${modal.categoryId[0]}${Date.now()}`, text, createdAt: today }
+    const newStandard: Standard = { id: `${modal.categoryId[0]}${Date.now()}`, text, type: promiseType, createdAt: today }
     handleSaveStandards({
       categories: standards.categories.map(cat =>
         cat.id !== modal.categoryId ? cat : {
@@ -126,21 +134,43 @@ export default function Home() {
   function handleDeleteStandard(categoryId: string, standardId: string) {
     if (!standards) return
     const standard = standards.categories.find(c => c.id === categoryId)?.standards.find(s => s.id === standardId)
-    setConfirm({
-      title: 'Delete promise?',
-      message: `"${standard?.text ?? 'This promise'}" will be permanently removed.`,
-      onConfirm: () => {
-        handleSaveStandards({
-          categories: standards.categories.map(cat =>
-            cat.id !== categoryId ? cat : {
-              ...cat,
-              standards: cat.standards.filter(s => s.id !== standardId),
-            }
-          ),
-        })
-        setConfirm(null)
-      },
-    })
+    const isHard = !standard?.type || standard.type === 'hard'
+
+    function doDelete() {
+      handleSaveStandards({
+        categories: standards!.categories.map(cat =>
+          cat.id !== categoryId ? cat : {
+            ...cat,
+            standards: cat.standards.filter(s => s.id !== standardId),
+          }
+        ),
+      })
+      setConfirm(null)
+    }
+
+    if (isHard) {
+      setConfirm({
+        title: 'Remove hard promise?',
+        message: `"${standard?.text ?? 'This promise'}" is a hard commitment. How are you removing it?`,
+        secondaryAction: {
+          label: '✅ Promise fulfilled — remove it',
+          onAction: () => { doDelete() },
+        },
+        confirmLabel: '❌ Giving up — remove with -1 penalty',
+        onConfirm: () => {
+          const updated = { ...penalties, [today]: (penalties[today] ?? 0) + 1 }
+          setPenalties(updated)
+          savePenalties(updated)
+          doDelete()
+        },
+      })
+    } else {
+      setConfirm({
+        title: 'Delete promise?',
+        message: `"${standard?.text ?? 'This promise'}" will be permanently removed.`,
+        onConfirm: () => { doDelete() },
+      })
+    }
   }
 
   function handleAddCategory(label: string, icon: string, color: string) {
@@ -151,12 +181,35 @@ export default function Home() {
     })
   }
 
+  function handleEditCategory(categoryId: string) {
+    setEditingCategoryId(categoryId)
+  }
+
+  function handleSaveEditCategory(label: string, icon: string, color: string) {
+    if (!standards || !editingCategoryId) return
+    handleSaveStandards({
+      categories: standards.categories.map(c =>
+        c.id !== editingCategoryId ? c : { ...c, label, icon, color }
+      ),
+    })
+    setEditingCategoryId(null)
+  }
+
   function handleDeleteCategory(categoryId: string) {
     if (!standards) return
     const cat = standards.categories.find(c => c.id === categoryId)
+    if (cat && cat.standards.length > 0) {
+      setConfirm({
+        title: `Can't delete "${cat.label}"`,
+        message: `Remove all ${cat.standards.length} promise(s) inside it first, then delete the category.`,
+        confirmLabel: 'Got it',
+        onConfirm: () => setConfirm(null),
+      })
+      return
+    }
     setConfirm({
       title: `Delete "${cat?.label ?? 'category'}"?`,
-      message: `This will permanently remove the category and all ${cat?.standards.length ?? 0} promise(s) inside it.`,
+      message: 'This category is empty and will be permanently removed.',
       onConfirm: () => {
         handleSaveStandards({
           categories: standards.categories.filter(c => c.id !== categoryId),
@@ -206,7 +259,7 @@ export default function Home() {
     <div className="min-h-screen max-w-5xl mx-auto flex flex-col">
       {/* Sticky header */}
       <div className="sticky top-0 z-30 bg-[#0d0d1a] px-4 pt-8 pb-4 flex flex-col gap-4">
-        <ScoreBanner checkins={checkins} standards={standards} todayKey={today} todayCheckins={todayCheckins} />
+        <ScoreBanner checkins={checkins} standards={standards} todayKey={today} todayCheckins={todayCheckins} penalties={penalties} />
 
         <div className="flex gap-1 bg-white/5 rounded-xl p-1 w-fit mx-auto">
           {(['today', 'calendar'] as const).map(t => (
@@ -247,6 +300,7 @@ export default function Home() {
                 onAddStandard={handleAddStandard}
                 onDeleteStandard={handleDeleteStandard}
                 onDeleteCategory={handleDeleteCategory}
+                onEditCategory={handleEditCategory}
               />
             ))}
           </div>
@@ -294,13 +348,14 @@ export default function Home() {
       )}
 
       {tab === 'calendar' && (
-        <HeatmapCalendar checkins={checkins} standards={standards} />
+        <HeatmapCalendar checkins={checkins} standards={standards} penalties={penalties} />
       )}
 
       <EditModal
         open={!!modal}
         title={modal?.type === 'add' ? 'Add Promise' : 'Edit Promise'}
         initialValue={modal?.type === 'edit' ? modal.text : ''}
+        initialType={modal?.type === 'edit' ? modal.promiseType : 'hard'}
         placeholder="Write your promise..."
         onSave={modal?.type === 'add' ? handleSaveAdd : handleSaveEdit}
         onClose={() => setModal(null)}
@@ -313,10 +368,19 @@ export default function Home() {
         onClose={() => setCategoryModalOpen(false)}
       />
 
+      <CategoryModal
+        open={!!editingCategoryId}
+        initialValues={editingCategoryId ? (() => { const c = standards.categories.find(x => x.id === editingCategoryId); return c ? { label: c.label, icon: c.icon, color: c.color } : undefined })() : undefined}
+        onSave={handleSaveEditCategory}
+        onClose={() => setEditingCategoryId(null)}
+      />
+
       <ConfirmModal
         open={!!confirm}
         title={confirm?.title ?? ''}
         message={confirm?.message ?? ''}
+        confirmLabel={confirm?.confirmLabel}
+        secondaryAction={confirm?.secondaryAction}
         onConfirm={confirm?.onConfirm ?? (() => {})}
         onCancel={() => setConfirm(null)}
       />
