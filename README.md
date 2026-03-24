@@ -1,4 +1,4 @@
-# Pillars
+# Liveby
 
 Track your daily standards across Health, Relationship, Career & Money.
 

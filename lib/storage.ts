@@ -1,9 +1,9 @@
 import { StandardsData, CheckinsData, Affirmation } from './types'
 
 const KEYS = {
-  standards: 'pillars_standards',
-  checkins: 'pillars_checkins',
-  affirmations: 'pillars_affirmations',
+  standards: 'liveby_standards',
+  checkins: 'liveby_checkins',
+  affirmations: 'liveby_affirmations',
 }
 
 const DEFAULT_STANDARDS: StandardsData = {

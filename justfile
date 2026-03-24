@@ -5,7 +5,7 @@ JDK_URL  := "https://github.com/adoptium/temurin21-binaries/releases/download/jd
 SDK_URL  := "https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip"
 APK      := "android/app/build/outputs/apk/debug/app-debug.apk"
 AAB      := "android/app/build/outputs/bundle/release/app-release.aab"
-KEYSTORE := env_var_or_default("KEYSTORE_PATH", "pillars.keystore")
+KEYSTORE := env_var_or_default("KEYSTORE_PATH", "liveby.keystore")
 
 # List available recipes
 default:
@@ -55,7 +55,7 @@ keystore:
     echo "→ Generating release keystore..."
     $JAVA_HOME/bin/keytool -genkey -v \
         -keystore {{KEYSTORE}} \
-        -alias pillars \
+        -alias liveby \
         -keyalg RSA \
         -keysize 2048 \
         -validity 10000
@@ -70,7 +70,7 @@ aab: setup sync keystore
     export KEYSTORE_PATH="$(pwd)/{{KEYSTORE}}"
     read -p "Keystore password: " KEYSTORE_PASS
     read -p "Key password: "      KEY_PASS
-    export KEYSTORE_PASS KEY_ALIAS="pillars" KEY_PASS
+    export KEYSTORE_PASS KEY_ALIAS="liveby" KEY_PASS
     ./android/gradlew -p android bundleRelease
     echo ""
     echo "✅  AAB ready: {{AAB}}"
