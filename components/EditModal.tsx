@@ -6,25 +6,28 @@ interface Props {
   open: boolean
   title: string
   initialValue?: string
+  initialType?: 'hard' | 'soft'
   placeholder?: string
-  onSave: (value: string) => void
+  onSave: (value: string, type: 'hard' | 'soft') => void
   onClose: () => void
 }
 
-export default function EditModal({ open, title, initialValue = '', placeholder, onSave, onClose }: Props) {
+export default function EditModal({ open, title, initialValue = '', initialType = 'hard', placeholder, onSave, onClose }: Props) {
   const [value, setValue] = useState(initialValue)
+  const [type, setType] = useState<'hard' | 'soft'>(initialType)
   const ref = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     setValue(initialValue)
+    setType(initialType)
     if (open) setTimeout(() => ref.current?.focus(), 50)
-  }, [open, initialValue])
+  }, [open, initialValue, initialType])
 
   if (!open) return null
 
   function save() {
     if (!value.trim()) return
-    onSave(value.trim())
+    onSave(value.trim(), type)
     onClose()
   }
 
@@ -41,6 +44,37 @@ export default function EditModal({ open, title, initialValue = '', placeholder,
           onChange={e => setValue(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); save() } }}
         />
+
+        {/* Hard / Soft toggle */}
+        <div className="flex flex-col gap-1.5">
+          <p className="text-xs text-white/35 font-medium uppercase tracking-wide">Promise weight</p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setType('hard')}
+              className={`flex-1 py-2 rounded-xl text-sm font-semibold border transition ${
+                type === 'hard'
+                  ? 'bg-rose-500/20 border-rose-500/50 text-rose-300'
+                  : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70'
+              }`}
+            >
+              🔒 Hard
+            </button>
+            <button
+              onClick={() => setType('soft')}
+              className={`flex-1 py-2 rounded-xl text-sm font-semibold border transition ${
+                type === 'soft'
+                  ? 'bg-sky-500/20 border-sky-500/50 text-sky-300'
+                  : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70'
+              }`}
+            >
+              🌊 Soft
+            </button>
+          </div>
+          <p className="text-xs text-white/30">
+            {type === 'hard' ? 'Hard promises count 5× toward your score.' : 'Soft promises count 1× — good habits, lower stakes.'}
+          </p>
+        </div>
+
         <div className="flex gap-2 justify-end">
           <button
             onClick={onClose}
