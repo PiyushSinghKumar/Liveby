@@ -4,6 +4,7 @@ const KEYS = {
   standards: 'liveby_standards',
   checkins: 'liveby_checkins',
   affirmations: 'liveby_affirmations',
+  penalties: 'liveby_penalties',
 }
 
 const DEFAULT_STANDARDS: StandardsData = {
@@ -45,6 +46,15 @@ export function getAffirmations(): Affirmation[] {
 
 export function saveAffirmations(data: Affirmation[]) {
   set(KEYS.affirmations, data)
+}
+
+// penalties: { "2024-01-15": 2 } means -2 points on that day (from deleted hard promises)
+export function getPenalties(): Record<string, number> {
+  return get(KEYS.penalties, {})
+}
+
+export function savePenalties(data: Record<string, number>) {
+  set(KEYS.penalties, data)
 }
 
 export function todayKey(): string {

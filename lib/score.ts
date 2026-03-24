@@ -13,11 +13,20 @@ function activeCategoriesForDay(dateKey: string, standards: StandardsData) {
     .filter(cat => cat.standards.length > 0)
 }
 
+function weight(type?: 'hard' | 'soft') { return type === 'soft' ? 1 : 5 }
+
+function catScore(promises: StandardsData['categories'][number]['standards'], done: (id: string) => boolean) {
+  const total = promises.reduce((sum, s) => sum + weight(s.type), 0)
+  if (total === 0) return 0
+  const doneW = promises.filter(s => done(s.id)).reduce((sum, s) => sum + weight(s.type), 0)
+  return doneW / total
+}
+
 /**
  * Score a single day. Returns 0–10 or null if no checkin data exists for that day.
  *
- * Weighting: each category counts equally regardless of how many promises it has.
- * This prevents a large category from dominating the score.
+ * Weighting: each category counts equally. Within a category, hard promises (weight 5)
+ * count 5× as much as soft promises (weight 1). Missing type defaults to hard.
  *
  * Historical accuracy: only promises that existed on dateKey are included,
  * so adding new promises later does not retroactively hurt old scores.
@@ -26,6 +35,7 @@ export function scoreDay(
   dateKey: string,
   checkins: CheckinsData,
   standards: StandardsData,
+  penalties?: Record<string, number>,
 ): number | null {
   const dayData = checkins[dateKey]
   if (!dayData) return null
@@ -33,12 +43,9 @@ export function scoreDay(
   const cats = activeCategoriesForDay(dateKey, standards)
   if (cats.length === 0) return null
 
-  const catScores = cats.map(cat => {
-    const done = cat.standards.filter(s => dayData[s.id]).length
-    return done / cat.standards.length
-  })
-
-  return (catScores.reduce((a, b) => a + b, 0) / catScores.length) * 10
+  const scores = cats.map(cat => catScore(cat.standards, id => !!dayData[id]))
+  const base = (scores.reduce((a, b) => a + b, 0) / scores.length) * 10
+  return Math.max(0, base - (penalties?.[dateKey] ?? 0))
 }
 
 /**
@@ -50,16 +57,14 @@ export function scoreTodayLive(
   todayCheckins: DayCheckins,
   standards: StandardsData,
   todayKey: string,
+  penalties?: Record<string, number>,
 ): number {
   const cats = activeCategoriesForDay(todayKey, standards)
   if (cats.length === 0) return 0
 
-  const catScores = cats.map(cat => {
-    const done = cat.standards.filter(s => todayCheckins[s.id]).length
-    return done / cat.standards.length
-  })
-
-  return (catScores.reduce((a, b) => a + b, 0) / catScores.length) * 10
+  const scores = cats.map(cat => catScore(cat.standards, id => !!todayCheckins[id]))
+  const base = (scores.reduce((a, b) => a + b, 0) / scores.length) * 10
+  return Math.max(0, base - (penalties?.[todayKey] ?? 0))
 }
 
 /**
@@ -69,6 +74,7 @@ export function rollingAvg(
   checkins: CheckinsData,
   standards: StandardsData,
   days = 7,
+  penalties?: Record<string, number>,
 ): number | null {
   const scores: number[] = []
   const today = new Date()
@@ -76,7 +82,7 @@ export function rollingAvg(
     const d = new Date(today)
     d.setDate(d.getDate() - i)
     const key = d.toISOString().split('T')[0]
-    const s = scoreDay(key, checkins, standards)
+    const s = scoreDay(key, checkins, standards, penalties)
     if (s !== null) scores.push(s)
   }
   return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null
@@ -89,12 +95,13 @@ export function sparklineScores(
   checkins: CheckinsData,
   standards: StandardsData,
   days = 7,
+  penalties?: Record<string, number>,
 ): (number | null)[] {
   const today = new Date()
   return Array.from({ length: days }, (_, i) => {
     const d = new Date(today)
     d.setDate(d.getDate() - (days - 1 - i))
     const key = d.toISOString().split('T')[0]
-    return scoreDay(key, checkins, standards)
+    return scoreDay(key, checkins, standards, penalties)
   })
 }
