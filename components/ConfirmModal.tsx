@@ -7,9 +7,10 @@ interface Props {
   confirmLabel?: string
   onConfirm: () => void
   onCancel: () => void
+  secondaryAction?: { label: string; onAction: () => void; className?: string }
 }
 
-export default function ConfirmModal({ open, title, message, confirmLabel = 'Delete', onConfirm, onCancel }: Props) {
+export default function ConfirmModal({ open, title, message, confirmLabel = 'Delete', onConfirm, onCancel, secondaryAction }: Props) {
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-4 pb-8">
@@ -18,19 +19,29 @@ export default function ConfirmModal({ open, title, message, confirmLabel = 'Del
           <h3 className="text-base font-bold text-white">{title}</h3>
           <p className="text-sm text-white/50 mt-1">{message}</p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-2.5 rounded-xl border border-white/10 text-sm text-white/50 hover:text-white/80 transition"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-sm font-semibold text-white transition"
-          >
-            {confirmLabel}
-          </button>
+        <div className="flex flex-col gap-2">
+          {secondaryAction && (
+            <button
+              onClick={secondaryAction.onAction}
+              className={secondaryAction.className ?? 'w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-sm font-semibold text-white transition'}
+            >
+              {secondaryAction.label}
+            </button>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={onCancel}
+              className="flex-1 py-2.5 rounded-xl border border-white/10 text-sm text-white/50 hover:text-white/80 transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-sm font-semibold text-white transition"
+            >
+              {confirmLabel}
+            </button>
+          </div>
         </div>
       </div>
     </div>
