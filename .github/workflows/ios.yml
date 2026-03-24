@@ -1,0 +1,59 @@
+name: iOS Build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:          # also triggerable manually from GitHub UI
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────────────────
+      - uses: actions/checkout@v4
+
+      # ── Node.js ─────────────────────────────────────────────────────────────
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      # ── Next.js static export ───────────────────────────────────────────────
+      - name: Build Next.js
+        run: npm run build
+
+      # ── Capacitor sync ──────────────────────────────────────────────────────
+      - name: Sync Capacitor
+        run: npx cap sync ios
+
+      # ── CocoaPods ───────────────────────────────────────────────────────────
+      - name: Install CocoaPods
+        run: |
+          cd ios/App
+          pod install
+
+      # ── Build for Simulator (no signing needed) ─────────────────────────────
+      - name: Build for Simulator
+        run: |
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath ios/build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+          | xcpretty || true
+
+      # ── Upload .app as artifact ─────────────────────────────────────────────
+      - name: Upload Simulator App
+        uses: actions/upload-artifact@v4
+        with:
+          name: Liveby-simulator
+          path: ios/build/Build/Products/Debug-iphonesimulator/App.app
+          retention-days: 14

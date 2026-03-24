@@ -1,0 +1,123 @@
+name: iOS Release IPA
+
+on:
+  workflow_dispatch:           # manual trigger only
+    inputs:
+      version:
+        description: 'Version name (e.g. 1.1)'
+        required: true
+        default: '1.0'
+
+# ── Required GitHub Secrets ──────────────────────────────────────────────────
+# IOS_CERTIFICATE_P12     — base64-encoded .p12 distribution certificate
+# IOS_CERTIFICATE_PASS    — password for the .p12 file
+# IOS_PROVISIONING_PROFILE — base64-encoded .mobileprovision file
+# IOS_TEAM_ID             — your 10-character Apple Team ID
+#
+# To encode a file to base64: base64 -i file.p12 | pbcopy
+
+jobs:
+  build-ipa:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Sync Capacitor
+        run: npx cap sync ios
+
+      - name: Install CocoaPods
+        run: cd ios/App && pod install
+
+      # ── Install signing certificate ──────────────────────────────────────
+      - name: Install signing certificate
+        env:
+          CERTIFICATE_P12: ${{ secrets.IOS_CERTIFICATE_P12 }}
+          CERTIFICATE_PASS: ${{ secrets.IOS_CERTIFICATE_PASS }}
+        run: |
+          echo "$CERTIFICATE_P12" | base64 --decode > /tmp/certificate.p12
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security import /tmp/certificate.p12 \
+            -k build.keychain \
+            -P "$CERTIFICATE_PASS" \
+            -T /usr/bin/codesign
+          security set-key-partition-list \
+            -S apple-tool:,apple: \
+            -s -k "" build.keychain
+
+      # ── Install provisioning profile ─────────────────────────────────────
+      - name: Install provisioning profile
+        env:
+          PROVISIONING_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE }}
+        run: |
+          echo "$PROVISIONING_PROFILE" | base64 --decode > /tmp/profile.mobileprovision
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          UUID=$(grep -a -A1 '<key>UUID</key>' /tmp/profile.mobileprovision | tail -1 | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+          cp /tmp/profile.mobileprovision \
+            ~/Library/MobileDevice/Provisioning\ Profiles/"$UUID".mobileprovision
+
+      # ── Archive ──────────────────────────────────────────────────────────
+      - name: Archive
+        env:
+          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: |
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath ios/build/Liveby.xcarchive \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            archive \
+          | xcpretty || true
+
+      # ── Generate ExportOptions.plist ─────────────────────────────────────
+      - name: Generate ExportOptions.plist
+        env:
+          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: |
+          cat > /tmp/ExportOptions.plist << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>ad-hoc</string>
+              <key>teamID</key>
+              <string>$TEAM_ID</string>
+              <key>compileBitcode</key>
+              <false/>
+          </dict>
+          </plist>
+          EOF
+
+      # ── Export IPA ───────────────────────────────────────────────────────
+      - name: Export IPA
+        run: |
+          xcodebuild \
+            -exportArchive \
+            -archivePath ios/build/Liveby.xcarchive \
+            -exportOptionsPlist /tmp/ExportOptions.plist \
+            -exportPath ios/ipa \
+          | xcpretty || true
+
+      # ── Upload artifact ──────────────────────────────────────────────────
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Liveby-${{ github.event.inputs.version }}-ipa
+          path: ios/ipa/*.ipa
+          retention-days: 30

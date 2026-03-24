@@ -78,42 +78,26 @@ aab: setup sync keystore
 
 # ── iOS (requires macOS + Xcode) ─────────────────────────────────────────────
 
-# Sync web assets into iOS and open Xcode (run this on a Mac)
+# Sync web assets into iOS and open Xcode
 ios: sync
     @echo "→ Opening Xcode — build and run from there"
     npx cap open ios
 
-# Build iOS app from command line (requires macOS + Xcode + provisioning)
-ios-build: sync
-    #!/usr/bin/env bash
-    if ! command -v xcodebuild &> /dev/null; then
-        echo "❌  xcodebuild not found — iOS builds require macOS with Xcode installed."
-        exit 1
-    fi
-    echo "→ Building iOS app..."
-    xcodebuild \
-        -workspace ios/App/App.xcworkspace \
-        -scheme App \
-        -configuration Debug \
-        -sdk iphonesimulator \
-        -derivedDataPath ios/build \
-        | xcpretty 2>/dev/null || true
-    @echo "✅  iOS build complete — check ios/build/"
+# Build for iOS Simulator (no signing required)
+ios-sim:
+    ./build-ios.sh --simulator
 
-# Install on connected iPhone via ios-deploy (requires: npm i -g ios-deploy, macOS only)
-ios-install: ios-build
-    #!/usr/bin/env bash
-    if ! command -v ios-deploy &> /dev/null; then
-        echo "❌  ios-deploy not found. Run: npm install -g ios-deploy"
-        exit 1
-    fi
-    APP=$(find ios/build -name "*.app" | head -1)
-    if [ -z "$APP" ]; then
-        echo "❌  No .app found — run 'just ios-build' first"
-        exit 1
-    fi
-    ios-deploy --bundle "$APP"
-    @echo "✅  Installed on iPhone"
+# Build for connected real device
+ios-device:
+    ./build-ios.sh --device
+
+# Export signed IPA for Ad Hoc / App Store distribution
+ios-ipa:
+    ./build-ios.sh --ipa
+
+# Install on connected iPhone (real device, requires ios-deploy)
+ios-install:
+    ./build-ios.sh --device
 
 # ── Setup ─────────────────────────────────────────────────────────────────────
 
