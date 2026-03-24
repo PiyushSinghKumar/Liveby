@@ -19,7 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 MODE="${1:---simulator}"
-WORKSPACE="ios/App/App.xcworkspace"
+PROJECT="ios/App/App.xcodeproj"
 SCHEME="App"
 BUILD_DIR="ios/build"
 IPA_DIR="ios/ipa"
@@ -85,7 +85,7 @@ if [[ "$MODE" == "--simulator" || "$MODE" == "-s" ]]; then
   echo ""
   echo "→ Building for iOS Simulator..."
   eval xcodebuild \
-    -workspace "$WORKSPACE" \
+    -project "$PROJECT" \
     -scheme "$SCHEME" \
     -configuration Debug \
     -sdk iphonesimulator \
@@ -108,7 +108,7 @@ elif [[ "$MODE" == "--device" || "$MODE" == "-d" ]]; then
   echo ""
   echo "→ Building for real device (requires valid signing identity)..."
   eval xcodebuild \
-    -workspace "$WORKSPACE" \
+    -project "$PROJECT" \
     -scheme "$SCHEME" \
     -configuration Debug \
     -sdk iphoneos \
@@ -156,7 +156,7 @@ PLIST
   fi
 
   eval xcodebuild \
-    -workspace "$WORKSPACE" \
+    -project "$PROJECT" \
     -scheme "$SCHEME" \
     -configuration Release \
     -sdk iphoneos \

@@ -37,9 +37,6 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync ios
 
-      - name: Install CocoaPods
-        run: cd ios/App && pod install
-
       # ── Install signing certificate ──────────────────────────────────────
       - name: Install signing certificate
         env:
@@ -75,7 +72,7 @@ jobs:
           TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
         run: |
           xcodebuild \
-            -workspace ios/App/App.xcworkspace \
+            -project ios/App/App.xcodeproj \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \

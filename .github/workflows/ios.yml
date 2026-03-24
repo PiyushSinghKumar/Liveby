@@ -30,17 +30,11 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync ios
 
-      # ── CocoaPods ───────────────────────────────────────────────────────────
-      - name: Install CocoaPods
-        run: |
-          cd ios/App
-          pod install
-
       # ── Build for Simulator (no signing needed) ─────────────────────────────
       - name: Build for Simulator
         run: |
           xcodebuild \
-            -workspace ios/App/App.xcworkspace \
+            -project ios/App/App.xcodeproj \
             -scheme App \
             -configuration Debug \
             -sdk iphonesimulator \
