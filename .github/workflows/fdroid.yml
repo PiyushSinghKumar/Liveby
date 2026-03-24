@@ -50,7 +50,7 @@ jobs:
         run: npx cap sync android
 
       - name: Decode keystore
-        run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > /tmp/liveby.keystore
+        run: echo "${{ secrets.KEYSTORE_FILE }}" | tr -d ' \n\r' | base64 --decode > /tmp/liveby.keystore
 
       - name: Build signed APK
         env:
