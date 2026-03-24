@@ -1,48 +1,57 @@
 'use client'
 
-import { useState, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import type { EmojiClickData } from 'emoji-picker-react'
 
 const EmojiPicker = lazy(() => import('emoji-picker-react'))
 
-export const AVAILABLE_COLORS = [
-  { id: 'emerald', label: 'Green',  swatch: 'bg-emerald-500' },
-  { id: 'rose',    label: 'Red',    swatch: 'bg-rose-500' },
-  { id: 'blue',    label: 'Blue',   swatch: 'bg-blue-500' },
-  { id: 'amber',   label: 'Amber',  swatch: 'bg-amber-500' },
-  { id: 'purple',  label: 'Purple', swatch: 'bg-purple-500' },
-  { id: 'cyan',    label: 'Cyan',   swatch: 'bg-cyan-500' },
-  { id: 'pink',    label: 'Pink',   swatch: 'bg-pink-500' },
-  { id: 'orange',  label: 'Orange', swatch: 'bg-orange-500' },
+export const SUGGESTED_CATEGORIES = [
+  { label: 'Health',        icon: '💪', color: '#10b981' },
+  { label: 'Relationship',  icon: '❤️', color: '#f43f5e' },
+  { label: 'Career',        icon: '🚀', color: '#3b82f6' },
+  { label: 'Money',         icon: '💰', color: '#f59e0b' },
+  { label: 'Mindset',       icon: '🧠', color: '#a855f7' },
+  { label: 'Spirituality',  icon: '🙏', color: '#06b6d4' },
+  { label: 'Learning',      icon: '📚', color: '#ec4899' },
+  { label: 'Family',        icon: '🏡', color: '#f97316' },
+  { label: 'Fitness',       icon: '🔥', color: '#ef4444' },
+  { label: 'Sleep',         icon: '🌙', color: '#8b5cf6' },
+  { label: 'Social',        icon: '🎯', color: '#14b8a6' },
+  { label: 'Creativity',    icon: '🎨', color: '#84cc16' },
 ]
 
-export const SUGGESTED_CATEGORIES = [
-  { label: 'Health',        icon: '💪', color: 'emerald' },
-  { label: 'Relationship',  icon: '❤️', color: 'rose'    },
-  { label: 'Career',        icon: '🚀', color: 'blue'    },
-  { label: 'Money',         icon: '💰', color: 'amber'   },
-  { label: 'Mindset',       icon: '🧠', color: 'purple'  },
-  { label: 'Spirituality',  icon: '🙏', color: 'cyan'    },
-  { label: 'Learning',      icon: '📚', color: 'pink'    },
-  { label: 'Family',        icon: '🏡', color: 'orange'  },
-  { label: 'Fitness',       icon: '🔥', color: 'rose'    },
-  { label: 'Sleep',         icon: '🌙', color: 'purple'  },
-  { label: 'Social',        icon: '🎯', color: 'cyan'    },
-  { label: 'Creativity',    icon: '🎨', color: 'pink'    },
+const PRESET_COLORS = [
+  '#ef4444','#f97316','#f59e0b','#84cc16',
+  '#10b981','#06b6d4','#3b82f6','#6366f1',
+  '#a855f7','#ec4899','#f43f5e','#14b8a6',
+  '#ffffff','#94a3b8','#64748b','#1e293b',
 ]
 
 interface Props {
   open: boolean
   existingLabels?: string[]
+  initialValues?: { label: string; icon: string; color: string }
   onSave: (label: string, icon: string, color: string) => void
   onClose: () => void
 }
 
-export default function CategoryModal({ open, existingLabels = [], onSave, onClose }: Props) {
-  const [label, setLabel] = useState('')
-  const [icon, setIcon] = useState('🎯')
-  const [color, setColor] = useState('purple')
+export default function CategoryModal({ open, existingLabels = [], initialValues, onSave, onClose }: Props) {
+  const [label, setLabel] = useState(initialValues?.label ?? '')
+  const [icon, setIcon] = useState(initialValues?.icon ?? '🎯')
+  const [color, setColor] = useState(initialValues?.color ?? '#6366f1')
   const [pickerOpen, setPickerOpen] = useState(false)
+  const colorInputRef = useRef<HTMLInputElement>(null)
+
+  const isEdit = !!initialValues
+
+  useEffect(() => {
+    if (open) {
+      setLabel(initialValues?.label ?? '')
+      setIcon(initialValues?.icon ?? '🎯')
+      setColor(initialValues?.color ?? '#6366f1')
+      setPickerOpen(false)
+    }
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!open) return null
 
@@ -50,10 +59,6 @@ export default function CategoryModal({ open, existingLabels = [], onSave, onClo
     const trimmed = label.trim()
     if (!trimmed) return
     onSave(trimmed, icon, color)
-    setLabel('')
-    setIcon('🎯')
-    setColor('purple')
-    setPickerOpen(false)
     onClose()
   }
 
@@ -76,10 +81,10 @@ export default function CategoryModal({ open, existingLabels = [], onSave, onClo
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-sm bg-[#1a1a2e] border border-white/15 rounded-2xl p-6 flex flex-col gap-5 shadow-2xl">
-        <h3 className="text-base font-bold text-white/90">New Category</h3>
+        <h3 className="text-base font-bold text-white/90">{isEdit ? 'Edit Category' : 'New Category'}</h3>
 
-        {/* Suggestions */}
-        {available.length > 0 && (
+        {/* Suggestions — only when creating */}
+        {!isEdit && available.length > 0 && (
           <div className="flex flex-col gap-2">
             <p className="text-xs text-white/35 font-medium uppercase tracking-wide">Quick add</p>
             <div className="flex flex-wrap gap-2">
@@ -125,22 +130,12 @@ export default function CategoryModal({ open, existingLabels = [], onSave, onClo
               <span className="text-2xl">{icon}</span>
               <span className="text-sm text-white/50">Tap to change</span>
             </button>
-
             {pickerOpen && (
               <div className="absolute left-0 top-full mt-2 z-10">
                 <Suspense fallback={
-                  <div className="w-64 h-40 flex items-center justify-center bg-[#1a1a2e] rounded-xl border border-white/10 text-white/30 text-sm">
-                    Loading...
-                  </div>
+                  <div className="w-64 h-40 flex items-center justify-center bg-[#1a1a2e] rounded-xl border border-white/10 text-white/30 text-sm">Loading...</div>
                 }>
-                  <EmojiPicker
-                    onEmojiClick={onEmojiClick}
-                    theme={'dark' as any}
-                    width={300}
-                    height={380}
-                    searchPlaceholder="Search emoji..."
-                    lazyLoadEmojis
-                  />
+                  <EmojiPicker onEmojiClick={onEmojiClick} theme={'dark' as any} width={300} height={380} searchPlaceholder="Search emoji..." lazyLoadEmojis />
                 </Suspense>
               </div>
             )}
@@ -148,28 +143,44 @@ export default function CategoryModal({ open, existingLabels = [], onSave, onClo
         </div>
 
         {/* Color picker */}
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <label className="text-xs text-white/40 font-medium uppercase tracking-wide">Color</label>
-          <div className="flex gap-2 flex-wrap">
-            {AVAILABLE_COLORS.map(c => (
+          {/* Preset swatches */}
+          <div className="flex flex-wrap gap-2">
+            {PRESET_COLORS.map(c => (
               <button
-                key={c.id}
-                onClick={() => setColor(c.id)}
-                className={`w-7 h-7 rounded-full ${c.swatch} transition ${
-                  color === c.id ? 'ring-2 ring-white/60 ring-offset-2 ring-offset-[#1a1a2e] scale-110' : 'opacity-60 hover:opacity-100'
+                key={c}
+                onClick={() => setColor(c)}
+                style={{ backgroundColor: c }}
+                className={`w-7 h-7 rounded-full transition ${
+                  color === c ? 'ring-2 ring-white/70 ring-offset-2 ring-offset-[#1a1a2e] scale-110' : 'opacity-70 hover:opacity-100'
                 }`}
-                title={c.label}
               />
             ))}
+            {/* Custom color picker */}
+            <button
+              onClick={() => colorInputRef.current?.click()}
+              className="w-7 h-7 rounded-full border-2 border-dashed border-white/30 hover:border-white/60 flex items-center justify-center text-white/40 hover:text-white/70 transition text-xs"
+              title="Custom color"
+            >＋</button>
+            <input
+              ref={colorInputRef}
+              type="color"
+              value={color.startsWith('#') ? color : '#6366f1'}
+              onChange={e => setColor(e.target.value)}
+              className="sr-only"
+            />
+          </div>
+          {/* Current color preview */}
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+            <span className="text-xs text-white/40 font-mono">{color}</span>
           </div>
         </div>
 
         {/* Actions */}
         <div className="flex gap-2 justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-1.5 text-sm text-white/50 hover:text-white/80 border border-white/10 rounded-lg transition"
-          >
+          <button onClick={onClose} className="px-4 py-1.5 text-sm text-white/50 hover:text-white/80 border border-white/10 rounded-lg transition">
             Cancel
           </button>
           <button
@@ -177,7 +188,7 @@ export default function CategoryModal({ open, existingLabels = [], onSave, onClo
             disabled={!label.trim()}
             className="px-4 py-1.5 text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg transition"
           >
-            Create
+            {isEdit ? 'Save' : 'Create'}
           </button>
         </div>
       </div>
