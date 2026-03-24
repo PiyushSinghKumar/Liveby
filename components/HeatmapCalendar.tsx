@@ -4,9 +4,15 @@ import { useState } from 'react'
 import { CheckinsData, StandardsData } from '@/lib/types'
 import { scoreDay } from '@/lib/score'
 
+const LEGACY_COLORS: Record<string, string> = {
+  emerald: '#10b981', rose: '#f43f5e', blue: '#3b82f6', amber: '#f59e0b',
+  purple: '#a855f7', cyan: '#06b6d4', pink: '#ec4899', orange: '#f97316',
+}
+
 interface Props {
   checkins: CheckinsData
   standards: StandardsData
+  penalties?: Record<string, number>
 }
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -17,8 +23,8 @@ function dateKey(y: number, m: number, d: number): string {
 }
 
 // scoreDay returns 0–10 (or null). Convert to 0–1 for internal use.
-function dayPct(key: string, checkins: CheckinsData, standards: StandardsData): number | null {
-  const s = scoreDay(key, checkins, standards)
+function dayPct(key: string, checkins: CheckinsData, standards: StandardsData, penalties?: Record<string, number>): number | null {
+  const s = scoreDay(key, checkins, standards, penalties)
   return s === null ? null : s / 10
 }
 
@@ -40,7 +46,7 @@ function pctToDot(pct: number | null): string {
   return 'bg-emerald-400'
 }
 
-function monthStats(year: number, month: number, checkins: CheckinsData, standards: StandardsData) {
+function monthStats(year: number, month: number, checkins: CheckinsData, standards: StandardsData, penalties?: Record<string, number>) {
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const today = new Date()
   const todayKey = today.toISOString().split('T')[0]
@@ -52,7 +58,7 @@ function monthStats(year: number, month: number, checkins: CheckinsData, standar
   for (let d = 1; d <= daysInMonth; d++) {
     const key = dateKey(year, month, d)
     if (key > todayKey) break
-    const pct = dayPct(key, checkins, standards)
+    const pct = dayPct(key, checkins, standards, penalties)
     if (pct !== null) {
       tracked++
       totalPct += pct
@@ -67,7 +73,7 @@ function monthStats(year: number, month: number, checkins: CheckinsData, standar
   }
 }
 
-export default function HeatmapCalendar({ checkins, standards }: Props) {
+export default function HeatmapCalendar({ checkins, standards, penalties }: Props) {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
@@ -102,10 +108,10 @@ export default function HeatmapCalendar({ checkins, standards }: Props) {
   // Pad to full weeks
   while (cells.length % 7 !== 0) cells.push(null)
 
-  const stats = monthStats(year, month, checkins, standards)
+  const stats = monthStats(year, month, checkins, standards, penalties)
 
   // Selected day detail
-  const selectedPct = selected ? dayPct(selected, checkins, standards) : null
+  const selectedPct = selected ? dayPct(selected, checkins, standards, penalties) : null
   const selectedDate = selected ? new Date(selected + 'T00:00:00') : null
   const allIds = standards.categories.flatMap(c => c.standards.map(s => s.id))
   const selectedCheckins = selected ? checkins[selected] ?? {} : {}
@@ -158,22 +164,21 @@ export default function HeatmapCalendar({ checkins, standards }: Props) {
             const key = dateKey(year, month, day)
             const isFuture = key > todayKey
             const isToday = key === todayKey
-            const pct = isFuture ? null : dayPct(key, checkins, standards)
+            const pct = isFuture ? null : dayPct(key, checkins, standards, penalties)
             const isSelected = selected === key
 
             return (
               <button
                 key={i}
-                onClick={() => !isFuture && setSelected(isSelected ? null : key)}
-                disabled={isFuture}
+                onClick={() => setSelected(isSelected ? null : key)}
                 className={`
                   relative aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5
-                  transition-all text-sm font-medium
-                  ${isFuture ? 'text-white/15 cursor-default' : 'cursor-pointer'}
+                  transition-all text-sm font-medium cursor-pointer
+                  ${isFuture ? 'text-white/25 hover:bg-white/5' : ''}
                   ${isSelected ? 'ring-2 ring-white/40 scale-105' : ''}
                   ${isToday ? 'ring-2 ring-indigo-400/70' : ''}
                   ${!isFuture ? pctToColor(pct) : ''}
-                  ${!isFuture && !isSelected ? 'hover:scale-105 hover:ring-1 hover:ring-white/20' : ''}
+                  ${!isSelected ? 'hover:scale-105 hover:ring-1 hover:ring-white/20' : ''}
                 `}
               >
                 <span className="leading-none">{day}</span>
@@ -204,63 +209,101 @@ export default function HeatmapCalendar({ checkins, standards }: Props) {
       </div>
 
       {/* Selected day detail */}
-      {selected && selectedDate && (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 animate-in fade-in duration-200">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-sm font-bold text-white">
-                {selectedDate.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
-              </h3>
-              <p className="text-xs text-white/40 mt-0.5">
-                {selectedPct === null
-                  ? 'No check-in recorded'
-                  : `${selectedDone} of ${allIds.length} standards completed — ${Math.round(selectedPct * 100)}%`}
-              </p>
+      {selected && selectedDate && (() => {
+        const isFutureSelected = selected > todayKey
+        const catColor = (c: string) => LEGACY_COLORS[c] ?? (c.startsWith('#') ? c : '#6366f1')
+
+        if (isFutureSelected) {
+          // Show planned promises for future date
+          const activeCats = standards.categories
+            .map(cat => ({ ...cat, standards: cat.standards.filter(s => !s.createdAt || s.createdAt <= selected) }))
+            .filter(cat => cat.standards.length > 0)
+          return (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 animate-in fade-in duration-200">
+              <div className="mb-4">
+                <h3 className="text-sm font-bold text-white">
+                  {selectedDate.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </h3>
+                <p className="text-xs text-indigo-400/70 mt-0.5">
+                  Upcoming — {activeCats.reduce((n, c) => n + c.standards.length, 0)} promises planned
+                </p>
+              </div>
+              {activeCats.length === 0
+                ? <p className="text-xs text-white/30 italic">No promises scheduled yet.</p>
+                : (
+                  <div className="flex flex-col gap-3">
+                    {activeCats.map(cat => (
+                      <div key={cat.id}>
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <span className="text-sm">{cat.icon}</span>
+                          <span className="text-xs font-semibold" style={{ color: catColor(cat.color) }}>{cat.label}</span>
+                        </div>
+                        <ul className="flex flex-col gap-1 pl-5">
+                          {cat.standards.map(s => (
+                            <li key={s.id} className="text-xs text-white/50 flex items-center gap-1.5">
+                              <span className="w-1 h-1 rounded-full bg-white/20 flex-shrink-0" />
+                              {s.text}
+                              {s.type === 'soft' && <span className="text-sky-400/60">soft</span>}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )
+              }
+            </div>
+          )
+        }
+
+        return (
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-5 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-bold text-white">
+                  {selectedDate.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </h3>
+                <p className="text-xs text-white/40 mt-0.5">
+                  {selectedPct === null
+                    ? 'No check-in recorded'
+                    : `${selectedDone} of ${allIds.length} promises completed — ${Math.round(selectedPct * 100)}%`}
+                </p>
+              </div>
+              {selectedPct !== null && (
+                <div className={`text-2xl font-bold ${
+                  selectedPct === 1 ? 'text-emerald-400' :
+                  selectedPct >= 0.7 ? 'text-emerald-500' :
+                  selectedPct >= 0.4 ? 'text-yellow-400' : 'text-red-400'
+                }`}>
+                  {Math.round(selectedPct * 100)}%
+                </div>
+              )}
             </div>
             {selectedPct !== null && (
-              <div className={`text-2xl font-bold ${
-                selectedPct === 1 ? 'text-emerald-400' :
-                selectedPct >= 0.7 ? 'text-emerald-500' :
-                selectedPct >= 0.4 ? 'text-yellow-400' : 'text-red-400'
-              }`}>
-                {Math.round(selectedPct * 100)}%
+              <div className="flex flex-col gap-2">
+                {standards.categories.map(cat => {
+                  const catIds = cat.standards.map(s => s.id)
+                  const catDone = catIds.filter(id => selectedCheckins[id]).length
+                  const catPct = catIds.length > 0 ? catDone / catIds.length : 0
+                  return (
+                    <div key={cat.id} className="flex items-center gap-3">
+                      <span className="text-sm w-4">{cat.icon}</span>
+                      <span className="text-xs text-white/50 w-24">{cat.label}</span>
+                      <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{ width: `${catPct * 100}%`, backgroundColor: catColor(cat.color) }}
+                        />
+                      </div>
+                      <span className="text-xs text-white/40 w-12 text-right">{catDone}/{catIds.length}</span>
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>
-
-          {selectedPct !== null && (
-            <div className="flex flex-col gap-2">
-              {standards.categories.map(cat => {
-                const catIds = cat.standards.map(s => s.id)
-                const catDone = catIds.filter(id => selectedCheckins[id]).length
-                const catPct = catIds.length > 0 ? catDone / catIds.length : 0
-                return (
-                  <div key={cat.id} className="flex items-center gap-3">
-                    <span className="text-sm w-4">{cat.icon}</span>
-                    <span className="text-xs text-white/50 w-24">{cat.label}</span>
-                    <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${
-                          cat.color === 'emerald' ? 'bg-emerald-500' :
-                          cat.color === 'rose'    ? 'bg-rose-500' :
-                          cat.color === 'blue'    ? 'bg-blue-500' :
-                          cat.color === 'amber'   ? 'bg-amber-500' :
-                          cat.color === 'purple'  ? 'bg-purple-500' :
-                          cat.color === 'cyan'    ? 'bg-cyan-500' :
-                          cat.color === 'pink'    ? 'bg-pink-500' :
-                          cat.color === 'orange'  ? 'bg-orange-500' : 'bg-indigo-500'
-                        }`}
-                        style={{ width: `${catPct * 100}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-white/40 w-12 text-right">{catDone}/{catIds.length}</span>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }
