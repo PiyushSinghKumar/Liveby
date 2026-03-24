@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ─── HRCM Standards — Android APK build script ───────────────────────────────
+# ─── Liveby — Android APK build script ───────────────────────────────────────
 # Run from the project root: ./build-android.sh
 # Produces: android/app/build/outputs/apk/debug/app-debug.apk
 
