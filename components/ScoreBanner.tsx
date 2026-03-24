@@ -11,6 +11,7 @@ interface Props {
   standards: StandardsData
   todayKey: string
   todayCheckins: Record<string, boolean>
+  penalties?: Record<string, number>
 }
 
 type Level = { label: string; color: string; ring: string; bg: string; text: string }
@@ -38,19 +39,19 @@ function getLevel(score: number): Level {
   return LEVELS.find(l => score >= l.min && score <= l.max)!.level
 }
 
-export default function ScoreBanner({ checkins, standards, todayKey, todayCheckins }: Props) {
+export default function ScoreBanner({ checkins, standards, todayKey, todayCheckins, penalties }: Props) {
   const [quote, setQuote] = useState(() => getMotivation(buildContext(checkins, standards)))
   const [fading, setFading] = useState(false)
 
-  const todayScore = scoreTodayLive(todayCheckins, standards, todayKey)
+  const todayScore = scoreTodayLive(todayCheckins, standards, todayKey, penalties)
   const yesterdayScore = useMemo(() => {
     const d = new Date(todayKey)
     d.setDate(d.getDate() - 1)
-    return scoreDay(d.toISOString().split('T')[0], checkins, standards)
-  }, [checkins, standards, todayKey])
+    return scoreDay(d.toISOString().split('T')[0], checkins, standards, penalties)
+  }, [checkins, standards, todayKey, penalties])
 
-  const rolling = useMemo(() => rollingAvg(checkins, standards), [checkins, standards])
-  const sparks = useMemo(() => sparklineScores(checkins, standards), [checkins, standards])
+  const rolling = useMemo(() => rollingAvg(checkins, standards, 7, penalties), [checkins, standards, penalties])
+  const sparks = useMemo(() => sparklineScores(checkins, standards, 7, penalties), [checkins, standards, penalties])
 
   const level = getLevel(todayScore)
 
