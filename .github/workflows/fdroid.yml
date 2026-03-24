@@ -1,0 +1,104 @@
+name: F-Droid Repository
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# ── Required GitHub Secrets ──────────────────────────────────────────────────
+# KEYSTORE_FILE   — base64-encoded release keystore  (base64 -i liveby.keystore)
+# KEYSTORE_PASS   — keystore password
+# KEY_ALIAS       — key alias (e.g. "liveby")
+# KEY_PASS        — key password
+#
+# Required once: enable GitHub Pages in repo Settings → Pages
+#   Source: Deploy from branch  |  Branch: gh-pages  |  Folder: / (root)
+#
+# Users add this URL to their F-Droid client:
+#   https://<your-github-username>.github.io/<repo-name>/fdroid/repo
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > /tmp/liveby.keystore
+
+      - name: Build signed APK
+        env:
+          KEYSTORE_PATH: /tmp/liveby.keystore
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          KEY_ALIAS:     ${{ secrets.KEY_ALIAS }}
+          KEY_PASS:      ${{ secrets.KEY_PASS }}
+        run: ./android/gradlew -p android assembleRelease
+
+      - name: Install fdroidserver
+        run: pip install fdroidserver
+
+      - name: Build F-Droid repo
+        env:
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          KEY_ALIAS:     ${{ secrets.KEY_ALIAS }}
+          KEY_PASS:      ${{ secrets.KEY_PASS }}
+        run: |
+          mkdir -p fdroid-work/repo
+
+          # Name APK with version code (fdroid convention)
+          VERSION=$(grep -m1 'versionCode' android/app/build.gradle | tr -dc '0-9')
+          cp android/app/build/outputs/apk/release/app-release.apk \
+             fdroid-work/repo/com.liveby.app_${VERSION}.apk
+
+          # Copy committed metadata if present
+          [ -d fdroid/metadata ] && cp -r fdroid/metadata fdroid-work/metadata
+
+          # Write fdroid config (stays local, never published)
+          cat > fdroid-work/config.yml << EOF
+          repo_url: "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/fdroid/repo"
+          repo_name: "Liveby"
+          repo_description: "Liveby — personal standards tracker"
+          archive_older: 3
+          repo_keyalias: "${KEY_ALIAS}"
+          keystorepass: "${KEYSTORE_PASS}"
+          keypass:      "${KEY_PASS}"
+          keystore:     "/tmp/liveby.keystore"
+          EOF
+
+          cd fdroid-work
+          fdroid update --create-metadata --verbose
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token:   ${{ secrets.GITHUB_TOKEN }}
+          publish_dir:    fdroid-work/repo
+          destination_dir: fdroid/repo
+          keep_files:     true
+          commit_message: "Update F-Droid repo"

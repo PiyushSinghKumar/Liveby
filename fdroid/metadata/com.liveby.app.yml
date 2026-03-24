@@ -1,0 +1,16 @@
+Categories:
+  - Health & Fitness
+License: UNLICENSED
+Name: Liveby
+Summary: Personal standards and habits tracker
+Description: |
+  Track your daily personal standards and habits. Set hard and soft promises,
+  score your day, and review your progress with a heatmap and motivational insights.
+
+  Hard promises carry 5× weight — breaking them costs you. Soft promises are
+  lower-stakes habits that still count toward your score.
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: '1.0'
+CurrentVersionCode: 1
