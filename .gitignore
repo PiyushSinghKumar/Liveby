@@ -1,5 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Signing keys — never commit these
+*.keystore
+*.jks
+
 # dependencies
 /node_modules
 /.pnp
@@ -39,3 +43,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Android build artifacts
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+*.apk
+*.aab
+
+# iOS build artifacts
+ios/App/build/
+ios/App/Pods/
+ios/App/App.xcworkspace/xcuserdata/
+*.ipa
+
+# Personal data (stays local, not committed)
+data/checkins.json
+data/affirmations.json
+
+# OS
+Thumbs.db
