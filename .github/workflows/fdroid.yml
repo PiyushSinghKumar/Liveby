@@ -50,7 +50,26 @@ jobs:
         run: npx cap sync android
 
       - name: Decode keystore
-        run: echo "${{ secrets.KEYSTORE_FILE }}" | tr -d ' \n\r' | base64 --decode > /tmp/liveby.keystore
+        env:
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          KEY_ALIAS:     ${{ secrets.KEY_ALIAS }}
+          KEY_PASS:      ${{ secrets.KEY_PASS }}
+        run: |
+          echo "${{ secrets.KEYSTORE_FILE }}" | tr -d ' \n\r' | base64 --decode > /tmp/liveby-src.keystore
+          # Convert to legacy PKCS12 — JDK 17+ uses AES-256 by default which
+          # Android's signing tool (older BouncyCastle) cannot read
+          keytool -importkeystore \
+            -srckeystore  /tmp/liveby-src.keystore \
+            -destkeystore /tmp/liveby.keystore \
+            -deststoretype PKCS12 \
+            -srcstorepass  "$KEYSTORE_PASS" \
+            -deststorepass "$KEYSTORE_PASS" \
+            -srcalias  "$KEY_ALIAS" \
+            -destalias "$KEY_ALIAS" \
+            -srckeypass  "$KEY_PASS" \
+            -destkeypass "$KEY_PASS" \
+            -noprompt \
+            -J-Dkeystore.pkcs12.legacy
 
       - name: Build signed APK
         env:
