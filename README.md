@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pillars
 
-## Getting Started
+Track your daily standards across Health, Relationship, Career & Money.
 
-First, run the development server:
+Built with Next.js + Capacitor. Runs as an Android APK or iOS app.
+
+---
+
+## Install on iPhone (Mac)
+
+### Prerequisites
+- Node.js 20+
+- Xcode (from the App Store)
+- CocoaPods: `sudo gem install cocoapods`
+
+### Steps
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1. Clone and install dependencies
+git clone <repo-url>
+cd standards
+npm install
+
+# 2. Build and open in Xcode
+just ios
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+In Xcode:
+- Select your iPhone from the device list at the top
+- Hit **Run ▶**
+- First time: go to **Settings → General → VPN & Device Management** on your iPhone and trust your developer certificate
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### No `just` installed?
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npx cap sync ios
+npx cap open ios
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Install on Android (Linux/Mac)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+just install   # builds APK and installs via adb
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Or just build the APK:
 
-## Deploy on Vercel
+```bash
+just apk
+# APK at: android/app/build/outputs/apk/debug/app-debug.apk
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Dev server
+
+```bash
+just dev       # http://localhost:3000
+```
+
+---
+
+## All commands
+
+```
+just dev          Start Next.js dev server
+just build        Build static export
+just apk          Build Android APK
+just install      Build + install APK on connected Android device
+just ios          Build + open Xcode (Mac only)
+just ios-build    Build iOS from command line (Mac only)
+just ios-install  Install IPA on connected iPhone (Mac only)
+just setup        Install JDK 21 + Android SDK
+just clean        Remove build artifacts
+just typecheck    TypeScript check
+```
+
+---
+
+## Data
+
+All data (checkins, affirmations) is stored locally on the device in `localStorage`. Nothing is sent to any server.
