@@ -2,15 +2,21 @@
 
 import { Category, DayCheckins } from '@/lib/types'
 
-const COLOR_MAP: Record<string, { bg: string; border: string; text: string; badge: string; check: string; bar: string }> = {
-  emerald: { bg: 'bg-emerald-950/40', border: 'border-emerald-700/40', text: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300', check: 'accent-emerald-500', bar: 'bg-emerald-500' },
-  rose:    { bg: 'bg-rose-950/40',    border: 'border-rose-700/40',    text: 'text-rose-400',    badge: 'bg-rose-500/20 text-rose-300',       check: 'accent-rose-500',    bar: 'bg-rose-500' },
-  blue:    { bg: 'bg-blue-950/40',    border: 'border-blue-700/40',    text: 'text-blue-400',    badge: 'bg-blue-500/20 text-blue-300',       check: 'accent-blue-500',    bar: 'bg-blue-500' },
-  amber:   { bg: 'bg-amber-950/40',   border: 'border-amber-700/40',   text: 'text-amber-400',   badge: 'bg-amber-500/20 text-amber-300',     check: 'accent-amber-500',   bar: 'bg-amber-500' },
-  purple:  { bg: 'bg-purple-950/40',  border: 'border-purple-700/40',  text: 'text-purple-400',  badge: 'bg-purple-500/20 text-purple-300',   check: 'accent-purple-500',  bar: 'bg-purple-500' },
-  cyan:    { bg: 'bg-cyan-950/40',    border: 'border-cyan-700/40',    text: 'text-cyan-400',    badge: 'bg-cyan-500/20 text-cyan-300',       check: 'accent-cyan-500',    bar: 'bg-cyan-500' },
-  pink:    { bg: 'bg-pink-950/40',    border: 'border-pink-700/40',    text: 'text-pink-400',    badge: 'bg-pink-500/20 text-pink-300',       check: 'accent-pink-500',    bar: 'bg-pink-500' },
-  orange:  { bg: 'bg-orange-950/40',  border: 'border-orange-700/40',  text: 'text-orange-400',  badge: 'bg-orange-500/20 text-orange-300',   check: 'accent-orange-500',  bar: 'bg-orange-500' },
+// Backward compat: map old named color IDs to hex
+const LEGACY_COLORS: Record<string, string> = {
+  emerald: '#10b981', rose: '#f43f5e', blue: '#3b82f6', amber: '#f59e0b',
+  purple: '#a855f7', cyan: '#06b6d4', pink: '#ec4899', orange: '#f97316',
+}
+
+function toHex(color: string): string {
+  return LEGACY_COLORS[color] ?? (color.startsWith('#') ? color : '#6366f1')
+}
+
+function rgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r},${g},${b},${alpha})`
 }
 
 interface Props {
@@ -22,33 +28,37 @@ interface Props {
   onAddStandard: (categoryId: string) => void
   onDeleteStandard: (categoryId: string, standardId: string) => void
   onDeleteCategory: (categoryId: string) => void
+  onEditCategory: (categoryId: string) => void
 }
 
 export default function CategoryCard({
-  category,
-  todayCheckins,
-  streaks,
-  onToggle,
-  onEditStandard,
-  onAddStandard,
-  onDeleteStandard,
-  onDeleteCategory,
+  category, todayCheckins, streaks,
+  onToggle, onEditStandard, onAddStandard, onDeleteStandard, onDeleteCategory, onEditCategory,
 }: Props) {
-  const colors = COLOR_MAP[category.color] ?? COLOR_MAP.blue
+  const hex = toHex(category.color)
   const total = category.standards.length
   const done = category.standards.filter(s => todayCheckins[s.id]).length
-  const pct = total === 0 ? 0 : Math.round((done / total) * 100)
+  const w = (type?: 'hard' | 'soft') => type === 'soft' ? 1 : 5
+  const totalW = category.standards.reduce((sum, s) => sum + w(s.type), 0)
+  const doneW = category.standards.filter(s => todayCheckins[s.id]).reduce((sum, s) => sum + w(s.type), 0)
+  const pct = totalW === 0 ? 0 : Math.round((doneW / totalW) * 100)
 
   return (
-    <div className={`rounded-2xl border ${colors.bg} ${colors.border} p-5 flex flex-col gap-4`}>
+    <div
+      className="rounded-2xl border p-5 flex flex-col gap-4"
+      style={{ backgroundColor: rgba(hex, 0.08), borderColor: rgba(hex, 0.35) }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-2xl">{category.icon}</span>
-          <h2 className={`text-lg font-bold ${colors.text}`}>{category.label}</h2>
+          <h2 className="text-lg font-bold" style={{ color: hex }}>{category.label}</h2>
         </div>
         <div className="flex items-center gap-1">
-          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${colors.badge}`}>
+          <span
+            className="text-xs font-semibold px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: rgba(hex, 0.15), color: rgba(hex, 0.9) }}
+          >
             {done}/{total}
           </span>
           <button
@@ -56,6 +66,11 @@ export default function CategoryCard({
             className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 active:bg-white/20 transition text-sm"
             title="Add promise"
           >+</button>
+          <button
+            onClick={() => onEditCategory(category.id)}
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/20 hover:text-white/70 hover:bg-white/10 active:bg-white/20 transition text-sm"
+            title="Edit category"
+          >✏️</button>
           <button
             onClick={() => onDeleteCategory(category.id)}
             className="w-7 h-7 flex items-center justify-center rounded-lg text-white/20 hover:text-rose-400 hover:bg-rose-500/10 active:bg-rose-500/20 transition text-xs font-bold"
@@ -67,12 +82,12 @@ export default function CategoryCard({
       {/* Progress bar */}
       <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${colors.bar}`}
-          style={{ width: `${pct}%` }}
+          className="h-full rounded-full transition-all duration-500"
+          style={{ width: `${pct}%`, backgroundColor: hex }}
         />
       </div>
 
-      {/* Standards list */}
+      {/* Promises list */}
       <ul className="flex flex-col gap-2">
         {category.standards.length === 0 && (
           <li className="text-white/30 text-sm italic">No promises yet. Add one above.</li>
@@ -86,7 +101,8 @@ export default function CategoryCard({
                 type="checkbox"
                 checked={checked}
                 onChange={e => onToggle(standard.id, e.target.checked)}
-                className={`mt-0.5 w-4 h-4 rounded cursor-pointer flex-shrink-0 ${colors.check}`}
+                className="mt-0.5 w-4 h-4 rounded cursor-pointer flex-shrink-0"
+                style={{ accentColor: hex }}
               />
               <span
                 className={`flex-1 text-sm leading-snug cursor-pointer select-none transition-all ${
@@ -95,6 +111,9 @@ export default function CategoryCard({
                 onClick={() => onToggle(standard.id, !checked)}
               >
                 {standard.text}
+                {standard.type === 'soft' && (
+                  <span className="ml-1.5 text-xs text-sky-400/70 font-medium">soft</span>
+                )}
               </span>
               {streak > 0 && (
                 <span className="text-xs text-orange-400 font-semibold flex-shrink-0" title={`${streak} day streak`}>
@@ -110,7 +129,7 @@ export default function CategoryCard({
                 <button
                   onClick={() => onDeleteStandard(category.id, standard.id)}
                   className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-rose-400 hover:bg-rose-500/10 active:bg-rose-500/20 transition text-sm font-bold"
-                  title="Delete"
+                  title={standard.type === 'soft' ? 'Delete' : 'Delete (penalty applies)'}
                 >✕</button>
               </div>
             </li>
@@ -120,7 +139,7 @@ export default function CategoryCard({
 
       {/* Completion label */}
       {total > 0 && (
-        <p className={`text-xs font-medium text-right ${colors.text} opacity-60`}>
+        <p className="text-xs font-medium text-right opacity-60" style={{ color: hex }}>
           {pct === 100 ? '✓ All done today' : `${pct}% today`}
         </p>
       )}
