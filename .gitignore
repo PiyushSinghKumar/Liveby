@@ -59,8 +59,8 @@ ios/App/App.xcworkspace/xcuserdata/
 *.ipa
 
 # Personal data (stays local, not committed)
-data/checkins.json
-data/affirmations.json
+data/
+standards.txt
 
 # OS
 Thumbs.db
