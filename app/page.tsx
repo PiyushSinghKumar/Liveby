@@ -8,9 +8,11 @@ import {
   getAffirmations, saveAffirmations,
   getPenalties, savePenalties,
   hasOnboarded, setOnboarded,
+  getProfile, saveProfile,
   todayKey,
 } from '@/lib/storage'
 import OnboardingModal from '@/components/OnboardingModal'
+import ProfileSetup from '@/components/ProfileSetup'
 import CategoryCard from '@/components/CategoryCard'
 import { SUGGESTED_CATEGORIES } from '@/components/CategoryModal'
 import HeatmapCalendar from '@/components/HeatmapCalendar'
@@ -53,6 +55,8 @@ export default function Home() {
   const [affirmations, setAffirmations] = useState<Affirmation[]>([])
   const [penalties, setPenalties] = useState<Record<string, number>>({})
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showProfileSetup, setShowProfileSetup] = useState(false)
+  const [profileName, setProfileName] = useState('')
   useAutoBackup()
   const [modal, setModal] = useState<ModalState>(null)
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
@@ -69,6 +73,8 @@ export default function Home() {
     setAffirmations(getAffirmations())
     setPenalties(getPenalties())
     if (!hasOnboarded()) setShowOnboarding(true)
+    const p = getProfile()
+    setProfileName(p.name)
   }, [])
 
   const [today, setToday] = useState(todayKey)
@@ -265,13 +271,23 @@ export default function Home() {
   return (
     <>
     {showOnboarding && (
-      <OnboardingModal onDone={() => { setOnboarded(); setShowOnboarding(false) }} />
+      <OnboardingModal onDone={() => {
+        setOnboarded()
+        setShowOnboarding(false)
+        if (!getProfile().name) setShowProfileSetup(true)
+      }} />
+    )}
+    {showProfileSetup && (
+      <ProfileSetup onDone={name => {
+        if (name) setProfileName(name)
+        setShowProfileSetup(false)
+      }} />
     )}
     <InstallBanner />
     <div className="min-h-screen max-w-5xl mx-auto flex flex-col">
       {/* Sticky header */}
       <div className="sticky top-0 z-30 bg-[#0d0d1a] px-4 pt-8 pb-4 flex flex-col gap-4">
-        <ScoreBanner checkins={checkins} standards={standards} todayKey={today} todayCheckins={todayCheckins} penalties={penalties} />
+        <ScoreBanner checkins={checkins} standards={standards} todayKey={today} todayCheckins={todayCheckins} penalties={penalties} profileName={profileName} />
 
         <div className="flex items-center gap-2 justify-center">
         <div className="flex gap-1 bg-white/5 rounded-xl p-1 w-fit">
@@ -364,6 +380,20 @@ export default function Home() {
               onAdd={handleAddAffirmation}
               onDelete={handleDeleteAffirmation}
             />
+          </div>
+
+          {/* Profile */}
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-0.5">
+              <p className="text-sm font-semibold text-white/70">{profileName || 'Your name'}</p>
+              <p className="text-xs text-white/30">shown as future {profileName || 'you'} in the app</p>
+            </div>
+            <button
+              onClick={() => setShowProfileSetup(true)}
+              className="text-xs text-white/30 hover:text-white/70 border border-white/10 hover:border-white/30 rounded-xl px-3 py-1.5 transition"
+            >
+              Edit
+            </button>
           </div>
 
           <DataPortability onImported={() => {

@@ -12,6 +12,7 @@ interface Props {
   todayKey: string
   todayCheckins: Record<string, boolean>
   penalties?: Record<string, number>
+  profileName?: string
 }
 
 type Level = { label: string; color: string; ring: string; bg: string; text: string }
@@ -39,7 +40,7 @@ function getLevel(score: number): Level {
   return LEVELS.find(l => score >= l.min && score <= l.max)!.level
 }
 
-export default function ScoreBanner({ checkins, standards, todayKey, todayCheckins, penalties }: Props) {
+export default function ScoreBanner({ checkins, standards, todayKey, todayCheckins, penalties, profileName }: Props) {
   const [quote, setQuote] = useState(() => getMotivation(buildContext(checkins, standards)))
   const [fading, setFading] = useState(false)
 
@@ -142,7 +143,7 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
           <div className="flex-1 flex items-start gap-2 min-w-0">
             <div className={`flex-1 flex flex-col gap-1 transition-opacity duration-200 ${fading ? 'opacity-0' : 'opacity-100'}`}>
               <p className="text-xs leading-relaxed text-white/50 italic">{quote}</p>
-              <p className="text-[10px] text-white/20">— future you</p>
+              <p className="text-[10px] text-white/20">— future {profileName || 'you'}</p>
             </div>
             <button
               onClick={refreshQuote}

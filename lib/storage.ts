@@ -8,6 +8,7 @@ const KEYS = {
   onboarded: 'liveby_onboarded',
   autoBackup: 'liveby_auto_backup',
   lastBackup: 'liveby_last_backup',
+  profile: 'liveby_profile',
 }
 
 const DEFAULT_STANDARDS: StandardsData = {
@@ -114,6 +115,18 @@ export function getLastBackupDate(): string | null {
 
 export function setLastBackupDate(date: string) {
   localStorage.setItem(KEYS.lastBackup, date)
+}
+
+export interface Profile {
+  name: string
+}
+
+export function getProfile(): Profile {
+  return get(KEYS.profile, { name: '' })
+}
+
+export function saveProfile(p: Profile) {
+  set(KEYS.profile, p)
 }
 
 export function todayKey(): string {
