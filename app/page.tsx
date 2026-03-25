@@ -11,6 +11,8 @@ import {
   getProfile, Profile,
   todayKey,
 } from '@/lib/storage'
+import InstallChoice from '@/components/InstallChoice'
+import WelcomeScreen from '@/components/WelcomeScreen'
 import OnboardingModal from '@/components/OnboardingModal'
 import ProfileSetup from '@/components/ProfileSetup'
 import ProfileMenu from '@/components/ProfileMenu'
@@ -23,7 +25,6 @@ import CategoryModal from '@/components/CategoryModal'
 import ScoreBanner from '@/components/ScoreBanner'
 import ConfirmModal from '@/components/ConfirmModal'
 import DataPortability, { useAutoBackup } from '@/components/DataPortability'
-import InstallBanner from '@/components/InstallBanner'
 
 function computeStreaks(checkins: CheckinsData, standardIds: string[], today: string): Record<string, number> {
   const streaks: Record<string, number> = {}
@@ -55,6 +56,8 @@ export default function Home() {
   const [checkins, setCheckins] = useState<CheckinsData>({})
   const [affirmations, setAffirmations] = useState<Affirmation[]>([])
   const [penalties, setPenalties] = useState<Record<string, number>>({})
+  const [showInstallChoice, setShowInstallChoice] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
@@ -74,8 +77,14 @@ export default function Home() {
     setCheckins(getCheckins())
     setAffirmations(getAffirmations())
     setPenalties(getPenalties())
-    if (!hasOnboarded()) setShowOnboarding(true)
+    if (!hasOnboarded()) setShowWelcome(true)
     setProfile(getProfile())
+    // Show install choice once to web users who haven't been prompted
+    const isCapacitor = !!(window as unknown as Record<string, unknown>).Capacitor
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    if (!isCapacitor && !isStandalone && !localStorage.getItem('liveby_install_prompted')) {
+      setShowInstallChoice(true)
+    }
   }, [])
 
   const [today, setToday] = useState(todayKey)
@@ -271,6 +280,18 @@ export default function Home() {
 
   return (
     <>
+    {showInstallChoice && (
+      <InstallChoice onDone={() => {
+        localStorage.setItem('liveby_install_prompted', 'true')
+        setShowInstallChoice(false)
+      }} />
+    )}
+    {showWelcome && (
+      <WelcomeScreen onStart={() => {
+        setShowWelcome(false)
+        setShowOnboarding(true)
+      }} />
+    )}
     {showOnboarding && (
       <OnboardingModal onDone={() => {
         setOnboarded()
@@ -292,7 +313,6 @@ export default function Home() {
         onProfileChange={setProfile}
       />
     )}
-    <InstallBanner />
     <div className="min-h-screen max-w-5xl mx-auto flex flex-col">
       {/* Sticky header */}
       <div className="sticky top-0 z-30 bg-[#0d0d1a] px-4 pt-8 pb-4 flex flex-col gap-4">
