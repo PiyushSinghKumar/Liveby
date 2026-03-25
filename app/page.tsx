@@ -401,13 +401,7 @@ export default function Home() {
         onConfirm={confirm?.onConfirm ?? (() => {})}
         onCancel={() => setConfirm(null)}
       />
-      <footer className="px-4 py-6 text-center border-t border-white/5">
-        <p className="text-xs text-white/20">Made by Piyush Kumar Singh</p>
-        <a href="mailto:piyushkumarsingh.nmims@gmail.com" className="text-xs text-white/20 hover:text-white/50 transition">
-          piyushkumarsingh.nmims@gmail.com
-        </a>
-      </footer>
-      </main>
+</main>
     </div>
     </>
   )

@@ -110,6 +110,10 @@ export default function OnboardingModal({ onDone }: Props) {
         </div>
       </div>
 
+      {isLast && (
+        <p className="text-xs text-white/20 text-center">Made by Piyush Kumar Singh</p>
+      )}
+
       {/* Bottom nav */}
       <div className="flex flex-col items-center gap-5 px-8 pb-10">
         {/* Dots */}
