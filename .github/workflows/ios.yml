@@ -1,9 +1,7 @@
 name: iOS Build
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:          # also triggerable manually from GitHub UI
+  workflow_dispatch:          # disabled - re-enable when Apple Developer account is set up
 
 jobs:
   build:

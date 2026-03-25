@@ -1,7 +1,7 @@
 name: iOS Release IPA
 
 on:
-  workflow_dispatch:           # manual trigger only
+  workflow_dispatch:           # disabled - re-enable when Apple Developer account is set up
     inputs:
       version:
         description: 'Version name (e.g. 1.1)'
@@ -9,10 +9,10 @@ on:
         default: '1.0'
 
 # ── Required GitHub Secrets ──────────────────────────────────────────────────
-# IOS_CERTIFICATE_P12     — base64-encoded .p12 distribution certificate
-# IOS_CERTIFICATE_PASS    — password for the .p12 file
-# IOS_PROVISIONING_PROFILE — base64-encoded .mobileprovision file
-# IOS_TEAM_ID             — your 10-character Apple Team ID
+# IOS_CERTIFICATE_P12     - base64-encoded .p12 distribution certificate
+# IOS_CERTIFICATE_PASS    - password for the .p12 file
+# IOS_PROVISIONING_PROFILE - base64-encoded .mobileprovision file
+# IOS_TEAM_ID             - your 10-character Apple Team ID
 #
 # To encode a file to base64: base64 -i file.p12 | pbcopy
 
