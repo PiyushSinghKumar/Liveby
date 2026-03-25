@@ -13,18 +13,36 @@ export default function DataPortability({ onImported }: Props) {
 
   async function handleExport() {
     const filename = `liveby-backup-${new Date().toISOString().split('T')[0]}.json`
-    const blob = new Blob([exportData()], { type: 'application/json' })
+    const data = exportData()
+    const blob = new Blob([data], { type: 'application/json' })
     const file = new File([blob], filename, { type: 'application/json' })
 
+    // 1. Try native file share (modern browsers)
     if (navigator.canShare?.({ files: [file] })) {
       try {
         await navigator.share({ files: [file], title: 'Liveby Backup' })
         return
-      } catch {
-        // user cancelled or share failed, fall through to download
-      }
+      } catch { /* cancelled or unsupported, try next */ }
     }
 
+    // 2. Try text share (Capacitor WebView + most mobile browsers)
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Liveby Backup', text: data })
+        return
+      } catch { /* cancelled or unsupported, try next */ }
+    }
+
+    // 3. Try clipboard copy
+    if (navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(data)
+        setMsg({ text: 'Backup copied to clipboard. Paste it into a note or email to save it.', ok: true })
+        return
+      } catch { /* fall through */ }
+    }
+
+    // 4. Desktop download fallback
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
