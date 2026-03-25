@@ -58,62 +58,62 @@ export default function ProfileMenu({ profile, onClose, onEditName, onProfileCha
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
 
       {/* Bottom sheet */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900 rounded-t-3xl flex flex-col"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-3xl flex flex-col"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 1.5rem)' }}
       >
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-white/20" />
+          <div className="w-10 h-1 rounded-full bg-fill-2" />
         </div>
 
         {/* Avatar preview */}
         <div className="flex flex-col items-center gap-2 py-5">
-          <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white/15 bg-white/10 flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-line bg-fill-2 flex items-center justify-center">
             {profile.photo
               ? <img src={profile.photo} alt="profile" className="w-full h-full object-cover" />
-              : <span className="text-3xl font-bold text-white/60">
+              : <span className="text-3xl font-bold text-ink-2">
                   {profile.name ? profile.name[0].toUpperCase() : '?'}
                 </span>
             }
           </div>
-          <p className="text-white/60 text-sm font-medium">{profile.name || 'No name set'}</p>
+          <p className="text-ink-2 text-sm font-medium">{profile.name || 'No name set'}</p>
         </div>
 
         {/* Options */}
         <div className="flex flex-col px-4 gap-2">
           <button
             onClick={() => cameraRef.current?.click()}
-            className="w-full rounded-2xl bg-white/8 hover:bg-white/12 border border-white/10 text-white/70 font-medium py-4 transition text-sm"
+            className="w-full rounded-2xl bg-fill-2 hover:bg-fill-2 border border-line text-ink-2 font-medium py-4 transition text-sm"
           >
             Take a photo
           </button>
           <button
             onClick={() => galleryRef.current?.click()}
-            className="w-full rounded-2xl bg-white/8 hover:bg-white/12 border border-white/10 text-white/70 font-medium py-4 transition text-sm"
+            className="w-full rounded-2xl bg-fill-2 hover:bg-fill-2 border border-line text-ink-2 font-medium py-4 transition text-sm"
           >
             Choose from gallery
           </button>
           <button
             onClick={() => { onClose(); onEditName() }}
-            className="w-full rounded-2xl bg-white/8 hover:bg-white/12 border border-white/10 text-white/70 font-medium py-4 transition text-sm"
+            className="w-full rounded-2xl bg-fill-2 hover:bg-fill-2 border border-line text-ink-2 font-medium py-4 transition text-sm"
           >
             Edit name
           </button>
           {profile.photo && (
             <button
               onClick={removePhoto}
-              className="w-full rounded-2xl bg-white/8 hover:bg-white/12 border border-white/10 text-red-400 font-medium py-4 transition text-sm"
+              className="w-full rounded-2xl bg-fill-2 hover:bg-fill-2 border border-line text-red-400 font-medium py-4 transition text-sm"
             >
               Remove photo
             </button>
           )}
           <button
             onClick={onClose}
-            className="w-full rounded-2xl border border-white/10 text-white/30 font-medium py-4 transition text-sm"
+            className="w-full rounded-2xl border border-line text-ink-4 font-medium py-4 transition text-sm"
           >
             Cancel
           </button>

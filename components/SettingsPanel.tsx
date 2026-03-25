@@ -1,0 +1,170 @@
+'use client'
+
+import { useTheme } from 'next-themes'
+import { useEffect, useState } from 'react'
+
+const FONTS = [
+  { id: 'default', label: 'Default', preview: 'Aa' },
+  { id: 'rounded', label: 'Rounded', preview: 'Aa' },
+  { id: 'mono', label: 'Mono', preview: 'Aa' },
+  { id: 'serif', label: 'Serif', preview: 'Aa' },
+]
+
+const SIZES = [
+  { id: 'sm', label: 'S' },
+  { id: 'md', label: 'M' },
+  { id: 'lg', label: 'L' },
+]
+
+function getSavedFont() {
+  if (typeof window === 'undefined') return 'default'
+  return localStorage.getItem('liveby_font') ?? 'default'
+}
+
+function getSavedSize() {
+  if (typeof window === 'undefined') return 'md'
+  return localStorage.getItem('liveby_size') ?? 'md'
+}
+
+function applyFont(font: string) {
+  const html = document.documentElement
+  html.classList.remove('font-rounded', 'font-mono', 'font-serif')
+  if (font !== 'default') html.classList.add(`font-${font}`)
+  localStorage.setItem('liveby_font', font)
+}
+
+function applySize(size: string) {
+  const html = document.documentElement
+  html.classList.remove('size-sm', 'size-md', 'size-lg')
+  html.classList.add(`size-${size}`)
+  localStorage.setItem('liveby_size', size)
+}
+
+interface Props {
+  onClose: () => void
+}
+
+export default function SettingsPanel({ onClose }: Props) {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  const [font, setFont] = useState('default')
+  const [size, setSize] = useState('md')
+
+  useEffect(() => {
+    setMounted(true)
+    setFont(getSavedFont())
+    setSize(getSavedSize())
+  }, [])
+
+  function handleFont(f: string) {
+    setFont(f)
+    applyFont(f)
+  }
+
+  function handleSize(s: string) {
+    setSize(s)
+    applySize(s)
+  }
+
+  if (!mounted) return null
+
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-3xl flex flex-col"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 1.5rem)' }}
+      >
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-fill-2" />
+        </div>
+
+        <div className="flex flex-col px-5 pb-2 gap-5">
+          <h2 className="text-base font-bold text-ink pt-2">Settings</h2>
+
+          {/* Theme */}
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-ink-3 font-medium uppercase tracking-wide">Theme</p>
+            <div className="flex gap-2">
+              {[
+                { id: 'light', label: '☀️ Light' },
+                { id: 'dark', label: '🌙 Dark' },
+                { id: 'system', label: '⚙️ System' },
+              ].map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => setTheme(t.id)}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition ${
+                    theme === t.id
+                      ? 'bg-indigo-500/15 border-indigo-400/50 text-indigo-400'
+                      : 'bg-fill border-line text-ink-3 hover:text-ink-2'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Font */}
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-ink-3 font-medium uppercase tracking-wide">Font</p>
+            <div className="flex gap-2">
+              {FONTS.map(f => (
+                <button
+                  key={f.id}
+                  onClick={() => handleFont(f.id)}
+                  className={`flex-1 py-2.5 rounded-xl text-sm border transition flex flex-col items-center gap-0.5 ${
+                    font === f.id
+                      ? 'bg-indigo-500/15 border-indigo-400/50 text-indigo-400'
+                      : 'bg-fill border-line text-ink-3 hover:text-ink-2'
+                  }`}
+                  style={{
+                    fontFamily:
+                      f.id === 'rounded' ? "ui-rounded, 'Hiragino Maru Gothic ProN', system-ui, sans-serif" :
+                      f.id === 'mono' ? "ui-monospace, 'Cascadia Code', monospace" :
+                      f.id === 'serif' ? "ui-serif, Georgia, serif" : undefined,
+                  }}
+                >
+                  <span className="text-base font-semibold">{f.preview}</span>
+                  <span className="text-[10px]">{f.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Size */}
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-ink-3 font-medium uppercase tracking-wide">Text size</p>
+            <div className="flex gap-2">
+              {SIZES.map(s => (
+                <button
+                  key={s.id}
+                  onClick={() => handleSize(s.id)}
+                  className={`flex-1 py-2.5 rounded-xl border transition font-semibold ${
+                    size === s.id
+                      ? 'bg-indigo-500/15 border-indigo-400/50 text-indigo-400'
+                      : 'bg-fill border-line text-ink-3 hover:text-ink-2'
+                  }`}
+                  style={{
+                    fontSize: s.id === 'sm' ? '12px' : s.id === 'lg' ? '18px' : '15px',
+                  }}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="w-full rounded-2xl border border-line text-ink-4 font-medium py-4 transition text-sm"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </>
+  )
+}

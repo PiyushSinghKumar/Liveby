@@ -46,7 +46,7 @@ export default function CategoryCard({
   return (
     <div
       className="rounded-2xl border p-5 flex flex-col gap-4"
-      style={{ backgroundColor: rgba(hex, 0.08), borderColor: rgba(hex, 0.35) }}
+      style={{ backgroundColor: rgba(hex, 0.12), borderColor: rgba(hex, 0.5) }}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -63,24 +63,24 @@ export default function CategoryCard({
           </span>
           <button
             onClick={() => onAddStandard(category.id)}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 active:bg-white/20 transition text-sm"
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-ink-3 hover:text-ink hover:bg-fill-2 active:bg-fill-3 transition text-sm"
             title="Add promise"
           >+</button>
           <button
             onClick={() => onEditCategory(category.id)}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/20 hover:text-white/70 hover:bg-white/10 active:bg-white/20 transition text-sm"
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-ink-4 hover:text-ink-2 hover:bg-fill-2 active:bg-fill-3 transition text-sm"
             title="Edit category"
           >✏️</button>
           <button
             onClick={() => onDeleteCategory(category.id)}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/20 hover:text-rose-400 hover:bg-rose-500/10 active:bg-rose-500/20 transition text-xs font-bold"
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-ink-4 hover:text-rose-400 hover:bg-rose-500/10 active:bg-rose-500/20 transition text-xs font-bold"
             title="Delete category"
           >✕</button>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+      <div className="w-full h-1.5 bg-fill-2 rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{ width: `${pct}%`, backgroundColor: hex }}
@@ -90,7 +90,7 @@ export default function CategoryCard({
       {/* Promises list */}
       <ul className="flex flex-col gap-2">
         {category.standards.length === 0 && (
-          <li className="text-white/30 text-sm italic">No promises yet. Add one above.</li>
+          <li className="text-ink-4 text-sm italic">No promises yet. Add one above.</li>
         )}
         {category.standards.map(standard => {
           const checked = !!todayCheckins[standard.id]
@@ -106,7 +106,7 @@ export default function CategoryCard({
               />
               <span
                 className={`flex-1 text-sm leading-snug cursor-pointer select-none transition-all ${
-                  checked ? 'line-through text-white/30' : 'text-white/80'
+                  checked ? 'line-through text-ink-4' : 'text-ink'
                 }`}
                 onClick={() => onToggle(standard.id, !checked)}
               >
@@ -123,12 +123,12 @@ export default function CategoryCard({
               <div className="flex gap-1 flex-shrink-0">
                 <button
                   onClick={() => onEditStandard(category.id, standard.id, standard.text)}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 active:bg-white/20 transition text-sm"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-ink-3 hover:text-ink hover:bg-fill-2 active:bg-fill-3 transition text-sm"
                   title="Edit"
                 >✏️</button>
                 <button
                   onClick={() => onDeleteStandard(category.id, standard.id)}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-rose-400 hover:bg-rose-500/10 active:bg-rose-500/20 transition text-sm font-bold"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-ink-3 hover:text-rose-400 hover:bg-rose-500/10 active:bg-rose-500/20 transition text-sm font-bold"
                   title={standard.type === 'soft' ? 'Delete' : 'Delete (penalty applies)'}
                 >✕</button>
               </div>

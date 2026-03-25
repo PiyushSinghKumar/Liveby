@@ -13,11 +13,11 @@ interface Props {
 export default function ConfirmModal({ open, title, message, confirmLabel = 'Delete', onConfirm, onCancel, secondaryAction }: Props) {
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-4 pb-8">
-      <div className="w-full max-w-sm bg-[#1a1a2e] border border-white/15 rounded-2xl p-6 flex flex-col gap-4 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm p-4 pb-8">
+      <div className="w-full max-w-sm bg-card border border-line rounded-2xl p-6 flex flex-col gap-4 shadow-2xl">
         <div>
-          <h3 className="text-base font-bold text-white">{title}</h3>
-          <p className="text-sm text-white/50 mt-1">{message}</p>
+          <h3 className="text-base font-bold text-ink">{title}</h3>
+          <p className="text-sm text-ink-2 mt-1">{message}</p>
         </div>
         <div className="flex flex-col gap-2">
           {secondaryAction && (
@@ -31,7 +31,7 @@ export default function ConfirmModal({ open, title, message, confirmLabel = 'Del
           <div className="flex gap-2">
             <button
               onClick={onCancel}
-              className="flex-1 py-2.5 rounded-xl border border-white/10 text-sm text-white/50 hover:text-white/80 transition"
+              className="flex-1 py-2.5 rounded-xl border border-line text-sm text-ink-2 hover:text-ink transition"
             >
               Cancel
             </button>

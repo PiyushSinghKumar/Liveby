@@ -111,49 +111,49 @@ export default function DataPortability({ onImported }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5">
+    <div className="rounded-2xl border border-line bg-fill">
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between px-4 py-3"
       >
         <div className="flex flex-col items-start gap-0.5">
-          <p className="text-sm font-semibold text-white/70">Your data</p>
+          <p className="text-sm font-semibold text-ink-2">Your data</p>
           {lastBackup && !open && (
-            <p className="text-[11px] text-white/25">Last backup {lastBackup}</p>
+            <p className="text-[11px] text-ink-4">Last backup {lastBackup}</p>
           )}
         </div>
-        <span className={`text-white/30 text-sm transition-transform ${open ? 'rotate-180' : ''}`}>▾</span>
+        <span className={`text-ink-4 text-sm transition-transform ${open ? 'rotate-180' : ''}`}>▾</span>
       </button>
 
       {open && (
-        <div className="px-4 pb-4 flex flex-col gap-4 border-t border-white/10 pt-4">
-          <p className="text-xs text-white/35 leading-relaxed">
+        <div className="px-4 pb-4 flex flex-col gap-4 border-t border-line pt-4">
+          <p className="text-xs text-ink-3 leading-relaxed">
             Everything is stored only on this device. Back it up regularly so you never lose it.
           </p>
 
           <div className="flex gap-2">
-            <button onClick={handleExport} className="flex-1 rounded-xl border border-white/15 text-white/60 hover:text-white/90 hover:border-white/30 text-sm font-medium py-2.5 transition">
+            <button onClick={handleExport} className="flex-1 rounded-xl border border-line text-ink-2 hover:text-ink hover:border-line-2 text-sm font-medium py-2.5 transition">
               Export backup
             </button>
-            <button onClick={() => fileRef.current?.click()} className="flex-1 rounded-xl border border-white/15 text-white/60 hover:text-white/90 hover:border-white/30 text-sm font-medium py-2.5 transition">
+            <button onClick={() => fileRef.current?.click()} className="flex-1 rounded-xl border border-line text-ink-2 hover:text-ink hover:border-line-2 text-sm font-medium py-2.5 transition">
               Import backup
             </button>
             <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
           </div>
 
           {lastBackup && (
-            <p className="text-[11px] text-white/25">Last backup {lastBackup}</p>
+            <p className="text-[11px] text-ink-4">Last backup {lastBackup}</p>
           )}
 
-          <div className="border-t border-white/10 pt-3 flex flex-col gap-3">
+          <div className="border-t border-line pt-3 flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-white/60 font-medium">Auto backup</p>
-                <p className="text-xs text-white/30">Saves to your Documents folder automatically</p>
+                <p className="text-sm text-ink-2 font-medium">Auto backup</p>
+                <p className="text-xs text-ink-4">Saves to your Documents folder automatically</p>
               </div>
               <button
                 onClick={() => updateSettings({ enabled: !settings.enabled })}
-                className={`w-11 h-6 rounded-full transition-colors relative ${settings.enabled ? 'bg-emerald-500' : 'bg-white/15'}`}
+                className={`w-11 h-6 rounded-full transition-colors relative ${settings.enabled ? 'bg-emerald-500' : 'bg-fill-2'}`}
               >
                 <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${settings.enabled ? 'left-5' : 'left-0.5'}`} />
               </button>
@@ -168,7 +168,7 @@ export default function DataPortability({ onImported }: Props) {
                     className={`flex-1 rounded-xl border text-xs font-medium py-2 transition ${
                       settings.interval === interval
                         ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400'
-                        : 'border-white/10 text-white/40 hover:text-white/70'
+                        : 'border-line text-ink-3 hover:text-ink-2'
                     }`}
                   >
                     {INTERVAL_LABELS[interval]}

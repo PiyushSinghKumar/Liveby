@@ -12,6 +12,7 @@ import {
   todayKey,
 } from '@/lib/storage'
 import InstallChoice from '@/components/InstallChoice'
+import SettingsPanel from '@/components/SettingsPanel'
 import WelcomeScreen from '@/components/WelcomeScreen'
 import OnboardingModal from '@/components/OnboardingModal'
 import ProfileSetup from '@/components/ProfileSetup'
@@ -57,6 +58,7 @@ export default function Home() {
   const [affirmations, setAffirmations] = useState<Affirmation[]>([])
   const [penalties, setPenalties] = useState<Record<string, number>>({})
   const [showInstallChoice, setShowInstallChoice] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const [showWelcome, setShowWelcome] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const isInitialOnboarding = useRef(false)
@@ -293,7 +295,7 @@ export default function Home() {
   if (!standards) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-line border-t-ink rounded-full animate-spin" />
       </div>
     )
   }
@@ -329,6 +331,7 @@ export default function Home() {
         setShowProfileSetup(false)
       }} />
     )}
+    {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
     {showProfileMenu && (
       <ProfileMenu
         profile={profile}
@@ -339,17 +342,17 @@ export default function Home() {
     )}
     <div className="min-h-screen max-w-5xl mx-auto flex flex-col">
       {/* Sticky header */}
-      <div className="sticky top-0 z-30 bg-[#0d0d1a] px-4 pt-8 pb-4 flex flex-col gap-4">
+      <div className="sticky top-0 z-30 bg-card px-4 pt-8 pb-4 flex flex-col gap-4">
         <ScoreBanner checkins={checkins} standards={standards} todayKey={today} todayCheckins={todayCheckins} penalties={penalties} profileName={profile.name} profilePhoto={profile.photo} onEditProfile={() => setShowProfileMenu(true)} />
 
         <div className="flex items-center gap-2 justify-center">
-        <div className="flex gap-1 bg-white/5 rounded-xl p-1 w-fit">
+        <div className="flex gap-1 bg-fill rounded-xl p-1 w-fit">
           {(['today', 'calendar'] as const).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${
-                tab === t ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/70'
+                tab === t ? 'bg-fill-2 text-ink' : 'text-ink-3 hover:text-ink-2'
               }`}
             >
               {t === 'today' ? 'Today' : 'Calendar'}
@@ -358,10 +361,17 @@ export default function Home() {
         </div>
         <button
           onClick={() => setShowOnboarding(true)}
-          className="w-7 h-7 rounded-full border border-white/15 text-white/30 hover:text-white/70 hover:border-white/30 text-sm font-semibold transition flex items-center justify-center"
+          className="w-7 h-7 rounded-full border border-line text-ink-4 hover:text-ink-2 hover:border-line-2 text-sm font-semibold transition flex items-center justify-center"
           title="Show tutorial"
         >
           ?
+        </button>
+        <button
+          onClick={() => setShowSettings(true)}
+          className="w-7 h-7 rounded-full border border-line text-ink-4 hover:text-ink-2 hover:border-line-2 text-sm transition flex items-center justify-center"
+          title="Settings"
+        >
+          ⚙️
         </button>
         </div>
       </div>
@@ -373,8 +383,8 @@ export default function Home() {
         <div className="flex flex-col gap-4">
           {standards.categories.length === 0 && (
             <div className="text-center py-6">
-              <p className="text-white/60 font-semibold text-base">Choose your focus area</p>
-              <p className="text-white/30 text-sm mt-1">Pick from suggestions below or create your own</p>
+              <p className="text-ink-2 font-semibold text-base">Choose your focus area</p>
+              <p className="text-ink-4 text-sm mt-1">Pick from suggestions below or create your own</p>
             </div>
           )}
 
@@ -400,14 +410,14 @@ export default function Home() {
             const existing = standards.categories.map(c => c.label.toLowerCase())
             const remaining = SUGGESTED_CATEGORIES.filter(s => !existing.includes(s.label.toLowerCase()))
             return (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex flex-col gap-3">
-                <p className="text-xs text-white/35 font-medium uppercase tracking-wide">Add a focus area</p>
+              <div className="rounded-2xl border border-line bg-fill p-4 flex flex-col gap-3">
+                <p className="text-xs text-ink-3 font-medium uppercase tracking-wide">Add a focus area</p>
                 <div className="flex flex-wrap gap-2">
                   {remaining.map(s => (
                     <button
                       key={s.label}
                       onClick={() => handleAddCategory(s.label, s.icon, s.color)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/25 active:bg-white/15 transition text-sm text-white/50 hover:text-white/90"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line bg-fill hover:bg-fill-2 hover:border-line-2 active:bg-fill-3 transition text-sm text-ink-2 hover:text-ink"
                     >
                       <span>{s.icon}</span>
                       <span>{s.label}</span>
@@ -415,7 +425,7 @@ export default function Home() {
                   ))}
                   <button
                     onClick={() => setCategoryModalOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/25 active:bg-white/15 transition text-sm text-white/50 hover:text-white/90"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line bg-fill hover:bg-fill-2 hover:border-line-2 active:bg-fill-3 transition text-sm text-ink-2 hover:text-ink"
                   >
                     <span>✏️</span>
                     <span>Custom</span>
@@ -426,7 +436,7 @@ export default function Home() {
           })()}
 
           {/* Affirmations - inline */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div className="rounded-2xl border border-line bg-fill p-4">
             <AffirmationsPanel
               affirmations={affirmations}
               onAdd={handleAddAffirmation}

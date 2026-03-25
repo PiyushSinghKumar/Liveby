@@ -38,12 +38,12 @@ export default function AffirmationsPanel({ affirmations, onAdd, onEdit, onDelet
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-xs text-white/35 font-medium uppercase tracking-wide">Your Affirmations</p>
+      <p className="text-xs text-ink-3 font-medium uppercase tracking-wide">Your Affirmations</p>
 
       {/* Input */}
       <div className="flex flex-col gap-2">
         <textarea
-          className={`w-full bg-white/5 border rounded-xl p-3 text-sm text-white/80 placeholder-white/20 resize-none focus:outline-none transition ${editingId ? 'border-indigo-500/50 focus:border-indigo-400' : 'border-white/10 focus:border-white/30'}`}
+          className={`w-full bg-fill border rounded-xl p-3 text-sm text-ink placeholder-ink-4 resize-none focus:outline-none transition ${editingId ? 'border-indigo-500/50 focus:border-indigo-400' : 'border-line focus:border-line-2'}`}
           rows={2}
           placeholder="Write something you want to remind yourself of..."
           value={text}
@@ -54,7 +54,7 @@ export default function AffirmationsPanel({ affirmations, onAdd, onEdit, onDelet
           {editingId && (
             <button
               onClick={cancelEdit}
-              className="px-4 py-1.5 border border-white/10 text-white/40 hover:text-white/70 text-sm font-semibold rounded-lg transition"
+              className="px-4 py-1.5 border border-line text-ink-3 hover:text-ink-2 text-sm font-semibold rounded-lg transition"
             >
               Cancel
             </button>
@@ -71,25 +71,25 @@ export default function AffirmationsPanel({ affirmations, onAdd, onEdit, onDelet
 
       {/* List */}
       {affirmations.length === 0 ? (
-        <p className="text-sm text-white/25 italic">Nothing added yet.</p>
+        <p className="text-sm text-ink-4 italic">Nothing added yet.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {affirmations.map(a => (
             <li
               key={a.id}
-              className={`flex items-start gap-3 rounded-xl border p-3 transition ${editingId === a.id ? 'border-indigo-500/40 bg-indigo-500/5' : 'border-white/10 bg-white/5'}`}
+              className={`flex items-start gap-3 rounded-xl border p-3 transition ${editingId === a.id ? 'border-indigo-500/40 bg-indigo-500/5' : 'border-line bg-fill'}`}
             >
-              <span className="flex-1 text-sm leading-snug text-white/70 italic">"{a.text}"</span>
+              <span className="flex-1 text-sm leading-snug text-ink-2 italic">"{a.text}"</span>
               <div className="flex gap-1 flex-shrink-0">
                 <button
                   onClick={() => editingId === a.id ? cancelEdit() : startEdit(a)}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-white/25 hover:text-white/70 hover:bg-white/10 transition text-sm"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-ink-4 hover:text-ink-2 hover:bg-fill-2 transition text-sm"
                 >
                   ✏️
                 </button>
                 <button
                   onClick={() => onDelete(a.id)}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-white/25 hover:text-rose-400 hover:bg-rose-500/10 transition text-sm font-bold"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-ink-4 hover:text-rose-400 hover:bg-rose-500/10 transition text-sm font-bold"
                 >
                   ✕
                 </button>

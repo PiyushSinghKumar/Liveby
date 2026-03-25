@@ -38,7 +38,7 @@ function pctToColor(pct: number | null): string {
 }
 
 function pctToDot(pct: number | null): string {
-  if (pct === null) return 'bg-white/5'
+  if (pct === null) return 'bg-fill'
   if (pct === 0)   return 'bg-red-500/50'
   if (pct < 0.4)   return 'bg-orange-500/60'
   if (pct < 0.7)   return 'bg-yellow-500/60'
@@ -120,27 +120,27 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
   return (
     <div className="flex flex-col gap-4">
       {/* Month card */}
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+      <div className="rounded-2xl border border-line bg-fill p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <button
             onClick={prevMonth}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-2 hover:text-ink hover:bg-fill-2 transition"
           >
             ‹
           </button>
           <div className="text-center">
-            <h2 className="text-base font-bold text-white">{MONTHS[month]} {year}</h2>
+            <h2 className="text-base font-bold text-ink">{MONTHS[month]} {year}</h2>
             {stats.avg !== null && (
-              <p className="text-xs text-white/40 mt-0.5">{stats.avg}% avg · {stats.perfect} perfect days</p>
+              <p className="text-xs text-ink-3 mt-0.5">{stats.avg}% avg · {stats.perfect} perfect days</p>
             )}
           </div>
           <button
             onClick={nextMonth}
             className={`w-8 h-8 flex items-center justify-center rounded-lg transition ${
               isCurrentMonth
-                ? 'text-white/20 cursor-not-allowed'
-                : 'text-white/50 hover:text-white hover:bg-white/10'
+                ? 'text-ink-4 cursor-not-allowed'
+                : 'text-ink-2 hover:text-ink hover:bg-fill-2'
             }`}
             disabled={isCurrentMonth}
           >
@@ -151,7 +151,7 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
         {/* Day headers */}
         <div className="grid grid-cols-7 mb-2">
           {DAYS.map(d => (
-            <div key={d} className="text-center text-[10px] font-semibold text-white/30 uppercase tracking-wide py-1">
+            <div key={d} className="text-center text-[10px] font-semibold text-ink-4 uppercase tracking-wide py-1">
               {d}
             </div>
           ))}
@@ -174,11 +174,11 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
                 className={`
                   relative aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5
                   transition-all text-sm font-medium cursor-pointer
-                  ${isFuture ? 'text-white/25 hover:bg-white/5' : ''}
-                  ${isSelected ? 'ring-2 ring-white/40 scale-105' : ''}
+                  ${isFuture ? 'text-ink-4 hover:bg-fill' : ''}
+                  ${isSelected ? 'ring-2 ring-ink-2 scale-105' : ''}
                   ${isToday ? 'ring-2 ring-indigo-400/70' : ''}
                   ${!isFuture ? pctToColor(pct) : ''}
-                  ${!isSelected ? 'hover:scale-105 hover:ring-1 hover:ring-white/20' : ''}
+                  ${!isSelected ? 'hover:scale-105 hover:ring-1 hover:ring-line-2' : ''}
                 `}
               >
                 <span className="leading-none">{day}</span>
@@ -193,7 +193,7 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
         {/* Legend */}
         <div className="flex items-center gap-3 mt-4 justify-center flex-wrap">
           {[
-            { dot: 'bg-white/10', label: 'No data' },
+            { dot: 'bg-fill-2', label: 'No data' },
             { dot: 'bg-red-500/50', label: '0%' },
             { dot: 'bg-orange-500/60', label: '<40%' },
             { dot: 'bg-yellow-500/60', label: '<70%' },
@@ -202,7 +202,7 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
           ].map(({ dot, label }) => (
             <div key={label} className="flex items-center gap-1.5">
               <div className={`w-2 h-2 rounded-full ${dot}`} />
-              <span className="text-[10px] text-white/30">{label}</span>
+              <span className="text-[10px] text-ink-4">{label}</span>
             </div>
           ))}
         </div>
@@ -219,9 +219,9 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
             .map(cat => ({ ...cat, standards: cat.standards.filter(s => !s.createdAt || s.createdAt <= selected) }))
             .filter(cat => cat.standards.length > 0)
           return (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 animate-in fade-in duration-200">
+            <div className="rounded-2xl border border-line bg-fill p-5 animate-in fade-in duration-200">
               <div className="mb-4">
-                <h3 className="text-sm font-bold text-white">
+                <h3 className="text-sm font-bold text-ink">
                   {selectedDate.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </h3>
                 <p className="text-xs text-indigo-400/70 mt-0.5">
@@ -229,7 +229,7 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
                 </p>
               </div>
               {activeCats.length === 0
-                ? <p className="text-xs text-white/30 italic">No promises scheduled yet.</p>
+                ? <p className="text-xs text-ink-4 italic">No promises scheduled yet.</p>
                 : (
                   <div className="flex flex-col gap-3">
                     {activeCats.map(cat => (
@@ -240,8 +240,8 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
                         </div>
                         <ul className="flex flex-col gap-1 pl-5">
                           {cat.standards.map(s => (
-                            <li key={s.id} className="text-xs text-white/50 flex items-center gap-1.5">
-                              <span className="w-1 h-1 rounded-full bg-white/20 flex-shrink-0" />
+                            <li key={s.id} className="text-xs text-ink-2 flex items-center gap-1.5">
+                              <span className="w-1 h-1 rounded-full bg-fill-2 flex-shrink-0" />
                               {s.text}
                               {s.type === 'soft' && <span className="text-sky-400/60">soft</span>}
                             </li>
@@ -257,13 +257,13 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
         }
 
         return (
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5 animate-in fade-in duration-200">
+          <div className="rounded-2xl border border-line bg-fill p-5 animate-in fade-in duration-200">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-sm font-bold text-white">
+                <h3 className="text-sm font-bold text-ink">
                   {selectedDate.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </h3>
-                <p className="text-xs text-white/40 mt-0.5">
+                <p className="text-xs text-ink-3 mt-0.5">
                   {selectedPct === null
                     ? 'No check-in recorded'
                     : `${selectedDone} of ${allIds.length} promises completed - ${Math.round(selectedPct * 100)}%`}
@@ -288,14 +288,14 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
                   return (
                     <div key={cat.id} className="flex items-center gap-3">
                       <span className="text-sm w-4">{cat.icon}</span>
-                      <span className="text-xs text-white/50 w-24">{cat.label}</span>
-                      <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                      <span className="text-xs text-ink-2 w-24">{cat.label}</span>
+                      <div className="flex-1 h-1.5 bg-fill-2 rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all"
                           style={{ width: `${catPct * 100}%`, backgroundColor: catColor(cat.color) }}
                         />
                       </div>
-                      <span className="text-xs text-white/40 w-12 text-right">{catDone}/{catIds.length}</span>
+                      <span className="text-xs text-ink-3 w-12 text-right">{catDone}/{catIds.length}</span>
                     </div>
                   )
                 })}

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import config from '@/lib/config'
+import ThemeProvider from '@/components/ThemeProvider'
 
 export const metadata: Metadata = {
   title: config.appName,
@@ -24,14 +25,23 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
-      <body className="min-h-full bg-[#0d0d14] text-[#e8e8f0] antialiased">
-        <div className="border-t-2 border-indigo-500/40 bg-[#0d0d14]" style={{ paddingTop: 'env(safe-area-inset-top)' }} />
-        {children}
+      <body className="min-h-full antialiased">
+        {/* Restore font/size prefs before first paint */}
         <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            var font = localStorage.getItem('liveby_font');
+            var size = localStorage.getItem('liveby_size') || 'md';
+            if (font && font !== 'default') document.documentElement.classList.add('font-' + font);
+            document.documentElement.classList.add('size-' + size);
+          })();
           if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
+            navigator.serviceWorker.register('/sw.js');
           }
         `}} />
+        <ThemeProvider>
+          <div className="border-t-2 border-indigo-500/40 bg-[#0d0d14] dark:bg-[#0d0d14]" style={{ paddingTop: 'env(safe-area-inset-top)' }} />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

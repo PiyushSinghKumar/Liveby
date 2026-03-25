@@ -81,7 +81,7 @@ export default function OnboardingModal({ onDone }: Props) {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col bg-zinc-950 transition-opacity duration-300 ${exiting ? 'opacity-0' : 'opacity-100'}`}
+      className={`fixed inset-0 z-50 flex flex-col bg-bg transition-opacity duration-300 ${exiting ? 'opacity-0' : 'opacity-100'}`}
       style={{
         paddingTop: 'max(env(safe-area-inset-top), 3rem)',
         paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)',
@@ -93,7 +93,7 @@ export default function OnboardingModal({ onDone }: Props) {
       <div className="flex justify-end p-4">
         <button
           onClick={finish}
-          className="text-sm text-white/30 hover:text-white/60 transition px-2 py-1"
+          className="text-sm text-ink-4 hover:text-ink-2 transition px-2 py-1"
         >
           Skip
         </button>
@@ -104,10 +104,10 @@ export default function OnboardingModal({ onDone }: Props) {
         <div className="text-7xl">{s.icon}</div>
 
         <div className="flex flex-col gap-3 max-w-sm">
-          <h2 className="text-2xl font-bold text-white">{s.title}</h2>
-          <p className="text-white/70 leading-relaxed">{s.body}</p>
+          <h2 className="text-2xl font-bold text-ink">{s.title}</h2>
+          <p className="text-ink-2 leading-relaxed">{s.body}</p>
           {s.detail && (
-            <p className="text-sm text-white/40 leading-relaxed border border-white/10 rounded-xl px-4 py-3 bg-white/5">
+            <p className="text-sm text-ink-3 leading-relaxed border border-line rounded-xl px-4 py-3 bg-fill">
               {s.detail}
             </p>
           )}
@@ -116,11 +116,11 @@ export default function OnboardingModal({ onDone }: Props) {
 
       {isLast && (
         <div className="text-center flex flex-col gap-1.5 px-8">
-          <p className="text-xs text-white/20 uppercase tracking-widest">a note from your future self</p>
-          <p className="text-sm text-white/50 leading-relaxed italic">
+          <p className="text-xs text-ink-4 uppercase tracking-widest">a note from your future self</p>
+          <p className="text-sm text-ink-2 leading-relaxed italic">
             Thank you for starting. I know how this ends and it is worth every day you showed up.
           </p>
-          <p className="text-xs text-white/20 mt-1">built by Piyush Kumar Singh</p>
+          <p className="text-xs text-ink-4 mt-1">built by Piyush Kumar Singh</p>
         </div>
       )}
 
@@ -135,7 +135,7 @@ export default function OnboardingModal({ onDone }: Props) {
               className={`rounded-full transition-all ${
                 i === slide
                   ? 'w-6 h-2 bg-emerald-400'
-                  : 'w-2 h-2 bg-white/20 hover:bg-white/40'
+                  : 'w-2 h-2 bg-fill-2 hover:bg-fill-3'
               }`}
             />
           ))}
@@ -146,7 +146,7 @@ export default function OnboardingModal({ onDone }: Props) {
           {slide > 0 && (
             <button
               onClick={() => setSlide(slide - 1)}
-              className="flex-1 rounded-2xl border border-white/15 text-white/60 hover:text-white/90 hover:border-white/30 font-semibold py-4 text-base transition"
+              className="flex-1 rounded-2xl border border-line text-ink-2 hover:text-ink hover:border-line-2 font-semibold py-4 text-base transition"
             >
               Back
             </button>

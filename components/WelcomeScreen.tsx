@@ -7,7 +7,7 @@ interface Props {
 export default function WelcomeScreen({ onStart }: Props) {
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-[#0a0a14]"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-bg"
       style={{
         paddingTop: 'max(env(safe-area-inset-top), 3rem)',
         paddingBottom: 'max(env(safe-area-inset-bottom), 2.5rem)',
@@ -26,8 +26,8 @@ export default function WelcomeScreen({ onStart }: Props) {
 
         {/* Name + tagline */}
         <div className="flex flex-col gap-3">
-          <h1 className="text-4xl font-black tracking-tight text-white">Liveby</h1>
-          <p className="text-lg text-white/50 leading-snug max-w-xs">
+          <h1 className="text-4xl font-black tracking-tight text-ink">Liveby</h1>
+          <p className="text-lg text-ink-2 leading-snug max-w-xs">
             Small promises to yourself.<br />Kept every day.
           </p>
         </div>
@@ -41,7 +41,7 @@ export default function WelcomeScreen({ onStart }: Props) {
           ].map(({ icon, text }) => (
             <div key={text} className="flex items-center gap-3 text-left">
               <span className="text-lg w-7 flex-shrink-0 text-center">{icon}</span>
-              <span className="text-sm text-white/45">{text}</span>
+              <span className="text-sm text-ink-3">{text}</span>
             </div>
           ))}
         </div>
@@ -55,7 +55,7 @@ export default function WelcomeScreen({ onStart }: Props) {
         >
           Get started
         </button>
-        <p className="text-xs text-white/20">Free. No account needed.</p>
+        <p className="text-xs text-ink-4">Free. No account needed.</p>
       </div>
     </div>
   )
