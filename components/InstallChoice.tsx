@@ -19,6 +19,7 @@ function getPlatform(): Platform {
 export default function InstallChoice({ onDone }: Props) {
   const [platform, setPlatform] = useState<Platform>('unknown')
   const [showIOSSteps, setShowIOSSteps] = useState(false)
+  const [showAndroidHint, setShowAndroidHint] = useState(false)
   const [canInstall, setCanInstall] = useState(false)
   const deferredPrompt = useRef<(Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }) | null>(null)
 
@@ -42,8 +43,57 @@ export default function InstallChoice({ onDone }: Props) {
     if (deferredPrompt.current) {
       await deferredPrompt.current.prompt()
       deferredPrompt.current = null
+      onDone()
+      return
+    }
+    // beforeinstallprompt hasn't fired yet — show Android manual hint
+    if (platform === 'android') {
+      setShowIOSSteps(false)
+      setShowAndroidHint(true)
+      return
     }
     onDone()
+  }
+
+  if (showAndroidHint) {
+    return (
+      <div
+        className="fixed inset-0 z-60 flex flex-col items-center justify-between bg-[#0a0a14]"
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top), 3rem)',
+          paddingBottom: 'max(env(safe-area-inset-bottom), 2rem)',
+        }}
+      >
+        <div />
+        <div className="flex flex-col items-center gap-8 px-8 text-center max-w-sm w-full">
+          <div className="text-5xl">📲</div>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-2xl font-bold text-white">Add to your home screen</h2>
+            <p className="text-sm text-white/40">Using Chrome on Android</p>
+          </div>
+          <div className="flex flex-col gap-3 w-full text-left">
+            {[
+              { step: '1', text: <>Tap the <span className="text-white font-medium">three dots</span> menu in Chrome ⋮</> },
+              { step: '2', text: <>Tap <span className="text-white font-medium">Add to Home screen</span></> },
+              { step: '3', text: <>Tap <span className="text-white font-medium">Add</span> to confirm</> },
+            ].map(({ step, text }) => (
+              <div key={step} className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+                <span className="text-indigo-400 font-bold text-base w-4 flex-shrink-0">{step}</span>
+                <p className="text-sm text-white/55 leading-relaxed">{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-col gap-3 w-full px-8 max-w-sm mx-auto">
+          <button
+            onClick={onDone}
+            className="w-full rounded-2xl border border-white/15 text-white/50 hover:text-white/80 hover:border-white/30 font-semibold py-4 text-sm transition"
+          >
+            Continue in browser for now
+          </button>
+        </div>
+      </div>
+    )
   }
 
   if (showIOSSteps) {
@@ -87,7 +137,8 @@ export default function InstallChoice({ onDone }: Props) {
     )
   }
 
-  const showInstallOption = platform === 'ios' || canInstall
+  // Always show install option on mobile; on desktop only when the browser supports it
+  const showInstallOption = platform === 'ios' || platform === 'android' || canInstall
 
   return (
     <div
