@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }
         `}} />
         <ThemeProvider>
-          <div className="border-t-2 border-indigo-500/40 bg-[#0d0d14] dark:bg-[#0d0d14]" style={{ paddingTop: 'env(safe-area-inset-top)' }} />
+          <div className="border-t-2 border-indigo-500/40 bg-bg" style={{ paddingTop: 'env(safe-area-inset-top)' }} />
           {children}
         </ThemeProvider>
       </body>
