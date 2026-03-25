@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Affirmation, CheckinsData, DayCheckins, Standard, StandardsData } from '@/lib/types'
 import {
   getStandards, saveStandards,
@@ -59,6 +59,7 @@ export default function Home() {
   const [showInstallChoice, setShowInstallChoice] = useState(false)
   const [showWelcome, setShowWelcome] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const isInitialOnboarding = useRef(false)
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [profile, setProfile] = useState<Profile>({ name: '' })
@@ -289,6 +290,7 @@ export default function Home() {
     {showWelcome && (
       <WelcomeScreen onStart={() => {
         setShowWelcome(false)
+        isInitialOnboarding.current = true
         setShowOnboarding(true)
       }} />
     )}
@@ -296,7 +298,8 @@ export default function Home() {
       <OnboardingModal onDone={() => {
         setOnboarded()
         setShowOnboarding(false)
-        if (!getProfile().name) setShowProfileSetup(true)
+        if (isInitialOnboarding.current && !getProfile().name) setShowProfileSetup(true)
+        isInitialOnboarding.current = false
       }} />
     )}
     {showProfileSetup && (
