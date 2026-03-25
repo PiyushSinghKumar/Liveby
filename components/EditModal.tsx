@@ -8,11 +8,14 @@ interface Props {
   initialValue?: string
   initialType?: 'hard' | 'soft'
   placeholder?: string
+  categories?: { id: string; label: string; icon: string }[]
+  currentCategoryId?: string
   onSave: (value: string, type: 'hard' | 'soft') => void
+  onMove?: (targetCategoryId: string) => void
   onClose: () => void
 }
 
-export default function EditModal({ open, title, initialValue = '', initialType = 'hard', placeholder, onSave, onClose }: Props) {
+export default function EditModal({ open, title, initialValue = '', initialType = 'hard', placeholder, categories, currentCategoryId, onSave, onMove, onClose }: Props) {
   const [value, setValue] = useState(initialValue)
   const [type, setType] = useState<'hard' | 'soft'>(initialType)
   const ref = useRef<HTMLTextAreaElement>(null)
@@ -74,6 +77,25 @@ export default function EditModal({ open, title, initialValue = '', initialType 
             {type === 'hard' ? 'Hard promises count 5× toward your score.' : 'Soft promises count 1× - good habits, lower stakes.'}
           </p>
         </div>
+
+        {/* Move to another category */}
+        {onMove && categories && categories.filter(c => c.id !== currentCategoryId).length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            <p className="text-xs text-white/35 font-medium uppercase tracking-wide">Move to</p>
+            <div className="flex flex-wrap gap-2">
+              {categories.filter(c => c.id !== currentCategoryId).map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => { onMove(cat.id); onClose() }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/25 text-white/50 hover:text-white/80 text-xs font-medium transition"
+                >
+                  <span>{cat.icon}</span>
+                  <span>{cat.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex gap-2 justify-end">
           <button

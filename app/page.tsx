@@ -124,6 +124,21 @@ export default function Home() {
     setModal({ type: 'edit', categoryId, standardId, text, promiseType: current?.type ?? 'hard' })
   }
 
+  function handleMoveStandard(targetCategoryId: string) {
+    if (!standards || modal?.type !== 'edit') return
+    const { categoryId, standardId } = modal
+    const standard = standards.categories.find(c => c.id === categoryId)?.standards.find(s => s.id === standardId)
+    if (!standard) return
+    handleSaveStandards({
+      categories: standards.categories.map(cat => {
+        if (cat.id === categoryId) return { ...cat, standards: cat.standards.filter(s => s.id !== standardId) }
+        if (cat.id === targetCategoryId) return { ...cat, standards: [...cat.standards, standard] }
+        return cat
+      }),
+    })
+    setModal(null)
+  }
+
   function handleSaveEdit(newText: string, promiseType: 'hard' | 'soft') {
     if (!standards || modal?.type !== 'edit') return
     handleSaveStandards({
@@ -433,7 +448,10 @@ export default function Home() {
         initialValue={modal?.type === 'edit' ? modal.text : ''}
         initialType={modal?.type === 'edit' ? modal.promiseType : 'hard'}
         placeholder="Write your promise..."
+        categories={modal?.type === 'edit' ? standards.categories.map(c => ({ id: c.id, label: c.label, icon: c.icon })) : undefined}
+        currentCategoryId={modal?.type === 'edit' ? modal.categoryId : undefined}
         onSave={modal?.type === 'add' ? handleSaveAdd : handleSaveEdit}
+        onMove={modal?.type === 'edit' ? handleMoveStandard : undefined}
         onClose={() => setModal(null)}
       />
 
