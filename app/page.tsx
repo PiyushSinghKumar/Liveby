@@ -7,8 +7,10 @@ import {
   getCheckins, saveCheckins,
   getAffirmations, saveAffirmations,
   getPenalties, savePenalties,
+  hasOnboarded, setOnboarded,
   todayKey,
 } from '@/lib/storage'
+import OnboardingModal from '@/components/OnboardingModal'
 import CategoryCard from '@/components/CategoryCard'
 import { SUGGESTED_CATEGORIES } from '@/components/CategoryModal'
 import HeatmapCalendar from '@/components/HeatmapCalendar'
@@ -48,6 +50,7 @@ export default function Home() {
   const [checkins, setCheckins] = useState<CheckinsData>({})
   const [affirmations, setAffirmations] = useState<Affirmation[]>([])
   const [penalties, setPenalties] = useState<Record<string, number>>({})
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const [modal, setModal] = useState<ModalState>(null)
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
@@ -62,6 +65,7 @@ export default function Home() {
     setCheckins(getCheckins())
     setAffirmations(getAffirmations())
     setPenalties(getPenalties())
+    if (!hasOnboarded()) setShowOnboarding(true)
   }, [])
 
   const [today, setToday] = useState(todayKey)
@@ -153,10 +157,10 @@ export default function Home() {
         title: 'Remove hard promise?',
         message: `"${standard?.text ?? 'This promise'}" is a hard commitment. How are you removing it?`,
         secondaryAction: {
-          label: '✅ Promise fulfilled — remove it',
+          label: '✅ Promise fulfilled - remove it',
           onAction: () => { doDelete() },
         },
-        confirmLabel: '❌ Giving up — remove with -1 penalty',
+        confirmLabel: '❌ Giving up - remove with -1 penalty',
         onConfirm: () => {
           const updated = { ...penalties, [today]: (penalties[today] ?? 0) + 1 }
           setPenalties(updated)
@@ -256,12 +260,17 @@ export default function Home() {
   const categoryLabels = standards.categories.map(c => c.label)
 
   return (
+    <>
+    {showOnboarding && (
+      <OnboardingModal onDone={() => { setOnboarded(); setShowOnboarding(false) }} />
+    )}
     <div className="min-h-screen max-w-5xl mx-auto flex flex-col">
       {/* Sticky header */}
       <div className="sticky top-0 z-30 bg-[#0d0d1a] px-4 pt-8 pb-4 flex flex-col gap-4">
         <ScoreBanner checkins={checkins} standards={standards} todayKey={today} todayCheckins={todayCheckins} penalties={penalties} />
 
-        <div className="flex gap-1 bg-white/5 rounded-xl p-1 w-fit mx-auto">
+        <div className="flex items-center gap-2 justify-center">
+        <div className="flex gap-1 bg-white/5 rounded-xl p-1 w-fit">
           {(['today', 'calendar'] as const).map(t => (
             <button
               key={t}
@@ -273,6 +282,14 @@ export default function Home() {
               {t === 'today' ? 'Today' : 'Calendar'}
             </button>
           ))}
+        </div>
+        <button
+          onClick={() => setShowOnboarding(true)}
+          className="w-7 h-7 rounded-full border border-white/15 text-white/30 hover:text-white/70 hover:border-white/30 text-sm font-semibold transition flex items-center justify-center"
+          title="Show tutorial"
+        >
+          ?
+        </button>
         </div>
       </div>
 
@@ -305,7 +322,7 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Suggestions — always visible, includes Custom chip */}
+          {/* Suggestions - always visible, includes Custom chip */}
           {(() => {
             const existing = standards.categories.map(c => c.label.toLowerCase())
             const remaining = SUGGESTED_CATEGORIES.filter(s => !existing.includes(s.label.toLowerCase()))
@@ -335,7 +352,7 @@ export default function Home() {
             )
           })()}
 
-          {/* Affirmations — inline */}
+          {/* Affirmations - inline */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
             <AffirmationsPanel
               affirmations={affirmations}
@@ -386,5 +403,6 @@ export default function Home() {
       />
       </main>
     </div>
+    </>
   )
 }
