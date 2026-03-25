@@ -22,7 +22,7 @@ const INTERVAL_LABELS: Record<BackupInterval, string> = {
 }
 
 async function runExport(silent = false): Promise<void> {
-  const filename = `liveby-backup-${new Date().toISOString().split('T')[0]}.json`
+  const filename = silent ? 'liveby-backup.json' : `liveby-backup-${new Date().toISOString().split('T')[0]}.json`
   const data = exportData()
   const blob = new Blob([data], { type: 'application/json' })
   const file = new File([blob], filename, { type: 'application/json' })
@@ -30,15 +30,6 @@ async function runExport(silent = false): Promise<void> {
 
   if (isCapacitor) {
     if (silent) {
-      // Delete any previous liveby backup files first
-      try {
-        const { files } = await Filesystem.readdir({ path: '', directory: Directory.Documents })
-        for (const f of files) {
-          if (f.name.startsWith('liveby-backup-') && f.name.endsWith('.json') && f.name !== filename) {
-            await Filesystem.deleteFile({ path: f.name, directory: Directory.Documents }).catch(() => {})
-          }
-        }
-      } catch { /* ignore if readdir fails */ }
       await Filesystem.writeFile({ path: filename, data, directory: Directory.Documents, encoding: Encoding.UTF8 })
     } else {
       await Share.share({ title: 'Liveby Backup', text: data, dialogTitle: 'Save your backup' })
