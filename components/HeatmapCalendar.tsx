@@ -225,7 +225,7 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
                   {selectedDate.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </h3>
                 <p className="text-xs text-indigo-400/70 mt-0.5">
-                  Upcoming — {activeCats.reduce((n, c) => n + c.standards.length, 0)} promises planned
+                  Upcoming - {activeCats.reduce((n, c) => n + c.standards.length, 0)} promises planned
                 </p>
               </div>
               {activeCats.length === 0
@@ -266,7 +266,7 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
                 <p className="text-xs text-white/40 mt-0.5">
                   {selectedPct === null
                     ? 'No check-in recorded'
-                    : `${selectedDone} of ${allIds.length} promises completed — ${Math.round(selectedPct * 100)}%`}
+                    : `${selectedDone} of ${allIds.length} promises completed - ${Math.round(selectedPct * 100)}%`}
                 </p>
               </div>
               {selectedPct !== null && (

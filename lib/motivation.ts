@@ -903,17 +903,17 @@ export function buildContext(checkins: CheckinsData, standards: StandardsData): 
   const score = scoreTodayLive(todayData, standards, today)
   const todayPct = score / 10
 
-  // Active promises for today (respects createdAt — same filter as scoreDay)
+  // Active promises for today (respects createdAt - same filter as scoreDay)
   const activeCats = standards.categories
     .map(cat => ({ ...cat, standards: cat.standards.filter(s => !s.createdAt || s.createdAt <= today) }))
     .filter(cat => cat.standards.length > 0)
 
-  // Missed categories — any active promise not checked
+  // Missed categories - any active promise not checked
   const missedCategories = activeCats
     .filter(cat => cat.standards.some(s => !todayData[s.id]))
     .map(c => c.label)
 
-  // 7-day rolling average (uses scoreDay internally — respects createdAt + equal weighting)
+  // 7-day rolling average (uses scoreDay internally - respects createdAt + equal weighting)
   const rolling7 = rollingAvg(checkins, standards, 7)
 
   // Trend vs yesterday
@@ -935,7 +935,7 @@ export function buildContext(checkins: CheckinsData, standards: StandardsData): 
     if (streak > topStreak) topStreak = streak
   }
 
-  // Perfect days this week — score must equal 10 (all active promises done)
+  // Perfect days this week - score must equal 10 (all active promises done)
   let perfectDaysThisWeek = 0
   for (let i = 0; i < 7; i++) {
     if (scoreDay(keyForOffset(i), checkins, standards) === 10) perfectDaysThisWeek++

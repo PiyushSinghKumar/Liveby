@@ -71,7 +71,7 @@ export default function EditModal({ open, title, initialValue = '', initialType 
             </button>
           </div>
           <p className="text-xs text-white/30">
-            {type === 'hard' ? 'Hard promises count 5× toward your score.' : 'Soft promises count 1× — good habits, lower stakes.'}
+            {type === 'hard' ? 'Hard promises count 5× toward your score.' : 'Soft promises count 1× - good habits, lower stakes.'}
           </p>
         </div>
 

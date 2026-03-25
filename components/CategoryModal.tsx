@@ -83,7 +83,7 @@ export default function CategoryModal({ open, existingLabels = [], initialValues
       <div className="w-full max-w-sm bg-[#1a1a2e] border border-white/15 rounded-2xl p-6 flex flex-col gap-5 shadow-2xl">
         <h3 className="text-base font-bold text-white/90">{isEdit ? 'Edit Category' : 'New Category'}</h3>
 
-        {/* Suggestions — only when creating */}
+        {/* Suggestions - only when creating */}
         {!isEdit && available.length > 0 && (
           <div className="flex flex-col gap-2">
             <p className="text-xs text-white/35 font-medium uppercase tracking-wide">Quick add</p>

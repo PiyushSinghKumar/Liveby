@@ -61,7 +61,7 @@ keystore:
         -validity 10000
     echo ""
     echo "✅  Keystore saved to {{KEYSTORE}}"
-    echo "⚠️   Back this file up somewhere safe — you cannot re-upload to Play Store without it."
+    echo "⚠️   Back this file up somewhere safe - you cannot re-upload to Play Store without it."
 
 # Build signed release AAB for Google Play upload
 aab: setup sync keystore
@@ -80,7 +80,7 @@ aab: setup sync keystore
 
 # Sync web assets into iOS and open Xcode
 ios: sync
-    @echo "→ Opening Xcode — build and run from there"
+    @echo "→ Opening Xcode - build and run from there"
     npx cap open ios
 
 # Build for iOS Simulator (no signing required)

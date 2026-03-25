@@ -6,10 +6,10 @@ on:
   workflow_dispatch:
 
 # ── Required GitHub Secrets ──────────────────────────────────────────────────
-# KEYSTORE_FILE   — base64-encoded release keystore  (base64 -i liveby.keystore)
-# KEYSTORE_PASS   — keystore password
-# KEY_ALIAS       — key alias (e.g. "liveby")
-# KEY_PASS        — key password
+# KEYSTORE_FILE   - base64-encoded release keystore  (base64 -i liveby.keystore)
+# KEYSTORE_PASS   - keystore password
+# KEY_ALIAS       - key alias (e.g. "liveby")
+# KEY_PASS        - key password
 #
 # Required once: enable GitHub Pages in repo Settings → Pages
 #   Source: Deploy from branch  |  Branch: gh-pages  |  Folder: / (root)
@@ -56,7 +56,7 @@ jobs:
           KEY_PASS:      ${{ secrets.KEY_PASS }}
         run: |
           echo "${{ secrets.KEYSTORE_FILE }}" | tr -d ' \n\r' | base64 --decode > /tmp/liveby-src.keystore
-          # Convert to legacy PKCS12 — JDK 17+ uses AES-256 by default which
+          # Convert to legacy PKCS12 - JDK 17+ uses AES-256 by default which
           # Android's signing tool (older BouncyCastle) cannot read
           keytool -importkeystore \
             -srckeystore  /tmp/liveby-src.keystore \
@@ -102,7 +102,7 @@ jobs:
           cat > fdroid-work/config.yml << EOF
           repo_url: "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/fdroid/repo"
           repo_name: "Liveby"
-          repo_description: "Liveby — personal standards tracker"
+          repo_description: "Liveby - personal standards tracker"
           archive_older: 3
           repo_keyalias: "${KEY_ALIAS}"
           keystorepass: "${KEYSTORE_PASS}"

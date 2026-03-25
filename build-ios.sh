@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ─── Liveby — iOS build script ───────────────────────────────────────────────
+# ─── Liveby - iOS build script ───────────────────────────────────────────────
 # Run from the project root: ./build-ios.sh [--simulator|--device|--ipa]
 #
 # Modes:
-#   (default)    Build for iOS Simulator — no signing required
+#   (default)    Build for iOS Simulator - no signing required
 #   --simulator  Same as default
 #   --device     Build for a connected real device (requires signing)
 #   --ipa        Export a signed IPA for Ad Hoc / App Store distribution
 #
 # Requirements (macOS only):
-#   Xcode          — install from App Store or xcode-select --install
-#   CocoaPods      — auto-installed via Homebrew if missing
-#   xcpretty       — auto-installed via gem if missing (optional, prettifies output)
+#   Xcode          - install from App Store or xcode-select --install
+#   CocoaPods      - auto-installed via Homebrew if missing
+#   xcpretty       - auto-installed via gem if missing (optional, prettifies output)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
@@ -43,7 +43,7 @@ echo "✓ $XCODE_VER"
 
 # ─── 3. CocoaPods ────────────────────────────────────────────────────────────
 if ! command -v pod &>/dev/null; then
-  echo "→ CocoaPods not found — installing via Homebrew..."
+  echo "→ CocoaPods not found - installing via Homebrew..."
   if ! command -v brew &>/dev/null; then
     echo "❌  Homebrew not found. Install from https://brew.sh then re-run."
     exit 1

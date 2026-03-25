@@ -2,7 +2,7 @@ export interface Standard {
   id: string
   text: string
   type?: 'hard' | 'soft'   // hard=weight 2, soft=weight 1. Defaults to hard if absent.
-  createdAt?: string        // ISO date "YYYY-MM-DD" — used to exclude from pre-creation history
+  createdAt?: string        // ISO date "YYYY-MM-DD" - used to exclude from pre-creation history
 }
 
 export interface Category {

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ─── Liveby — Android APK build script ───────────────────────────────────────
+# ─── Liveby - Android APK build script ───────────────────────────────────────
 # Run from the project root: ./build-android.sh
 # Produces: android/app/build/outputs/apk/debug/app-debug.apk
 
@@ -78,6 +78,6 @@ if [ -f "$APK" ]; then
   echo "   Install on connected device:  adb install $APK"
   echo "   Or copy the APK to your phone and open it."
 else
-  echo "❌ APK not found — check build output above."
+  echo "❌ APK not found - check build output above."
   exit 1
 fi

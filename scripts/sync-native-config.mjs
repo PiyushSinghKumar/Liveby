@@ -27,7 +27,7 @@ strings = strings
   .replace(/(<string name="package_name">)[^<]*/,        `$1${appId}`)
   .replace(/(<string name="custom_url_scheme">)[^<]*/,   `$1${appId}`)
 writeFileSync(stringsPath, strings)
-console.log(`✓ strings.xml  — name="${appName}"  id="${appId}"`)
+console.log(`✓ strings.xml  - name="${appName}"  id="${appId}"`)
 
 // ── build.gradle ───────────────────────────────────────────────────────────
 const gradlePath = resolve(root, 'android/app/build.gradle')
@@ -36,7 +36,7 @@ gradle = gradle
   .replace(/(namespace\s*=\s*")[^"]*(")/,  `$1${appId}$2`)
   .replace(/(applicationId\s+")[^"]*(")/,  `$1${appId}$2`)
 writeFileSync(gradlePath, gradle)
-console.log(`✓ build.gradle — applicationId="${appId}"`)
+console.log(`✓ build.gradle - applicationId="${appId}"`)
 
 // ── MainActivity.java ───────────────────────────────────────────────────────
 const javaRoot = resolve(root, 'android/app/src/main/java')
@@ -59,20 +59,20 @@ const newFile   = resolve(newPkgDir, 'MainActivity.java')
 mkdirSync(newPkgDir, { recursive: true })
 
 if (existing && existing !== newFile) {
-  // Moving to new package — update the package declaration, preserve everything else
+  // Moving to new package - update the package declaration, preserve everything else
   const content = readFileSync(existing, 'utf8')
     .replace(/^package\s+[\w.]+;/, `package ${appId};`)
   writeFileSync(newFile, content)
   rmSync(dirname(existing), { recursive: true, force: true })
-  console.log(`✓ MainActivity  — moved to ${appId}`)
+  console.log(`✓ MainActivity  - moved to ${appId}`)
 } else if (!existsSync(newFile)) {
-  // First time — write the default
+  // First time - write the default
   writeFileSync(newFile, `package ${appId};\n\nimport com.getcapacitor.BridgeActivity;\n\npublic class MainActivity extends BridgeActivity {}\n`)
-  console.log(`✓ MainActivity  — created at ${appId}`)
+  console.log(`✓ MainActivity  - created at ${appId}`)
 } else {
-  // Already exists at correct path — only update package name
+  // Already exists at correct path - only update package name
   const content = readFileSync(newFile, 'utf8')
     .replace(/^package\s+[\w.]+;/, `package ${appId};`)
   writeFileSync(newFile, content)
-  console.log(`✓ MainActivity  — package=${appId}`)
+  console.log(`✓ MainActivity  - package=${appId}`)
 }
