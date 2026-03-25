@@ -21,7 +21,7 @@ const INTERVAL_LABELS: Record<BackupInterval, string> = {
   monthly: 'Every month',
 }
 
-async function runExport(): Promise<void> {
+async function runExport(silent = false): Promise<void> {
   const filename = `liveby-backup-${new Date().toISOString().split('T')[0]}.json`
   const data = exportData()
   const blob = new Blob([data], { type: 'application/json' })
@@ -29,12 +29,16 @@ async function runExport(): Promise<void> {
   const isCapacitor = !!(window as unknown as Record<string, unknown>).Capacitor
 
   if (isCapacitor) {
-    await Filesystem.writeFile({
-      path: filename,
-      data,
-      directory: Directory.Documents,
-      encoding: Encoding.UTF8,
-    })
+    if (silent) {
+      await Filesystem.writeFile({
+        path: filename,
+        data,
+        directory: Directory.Documents,
+        encoding: Encoding.UTF8,
+      })
+    } else {
+      await Share.share({ title: 'Liveby Backup', text: data, dialogTitle: 'Save your backup' })
+    }
     return
   }
 
@@ -64,7 +68,7 @@ export function useAutoBackup() {
       : Infinity
 
     if (daysSince >= INTERVAL_DAYS[settings.interval]) {
-      runExport()
+      runExport(true)
         .then(() => setLastBackupDate(new Date().toISOString().split('T')[0]))
         .catch(() => {})
     }
