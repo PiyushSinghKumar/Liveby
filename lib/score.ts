@@ -51,7 +51,7 @@ export function scoreDay(
 /**
  * Score today using the current checkins map (before it is persisted).
  * Uses the same equal-category weighting.
- * Returns 0–10 (never null — 0 when nothing done or no promises set up).
+ * Returns 0–10 (never null - 0 when nothing done or no promises set up).
  */
 export function scoreTodayLive(
   todayCheckins: DayCheckins,
@@ -85,6 +85,27 @@ export function rollingAvg(
     const s = scoreDay(key, checkins, standards, penalties)
     if (s !== null) scores.push(s)
   }
+  return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null
+}
+
+/**
+ * Cumulative average over all fully completed past days (today excluded -
+ * today's score only counts once the day has rolled over).
+ * Returns null if there is no history yet.
+ */
+export function lifetimeScore(
+  checkins: CheckinsData,
+  standards: StandardsData,
+  penalties?: Record<string, number>,
+): number | null {
+  const todayKey = new Date().toISOString().split('T')[0]
+  const pastKeys = Object.keys(checkins).filter(k => k < todayKey)
+  if (pastKeys.length === 0) return null
+
+  const scores = pastKeys
+    .map(k => scoreDay(k, checkins, standards, penalties))
+    .filter((s): s is number => s !== null)
+
   return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null
 }
 

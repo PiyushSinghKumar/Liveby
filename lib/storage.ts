@@ -5,6 +5,7 @@ const KEYS = {
   checkins: 'liveby_checkins',
   affirmations: 'liveby_affirmations',
   penalties: 'liveby_penalties',
+  onboarded: 'liveby_onboarded',
 }
 
 const DEFAULT_STANDARDS: StandardsData = {
@@ -55,6 +56,14 @@ export function getPenalties(): Record<string, number> {
 
 export function savePenalties(data: Record<string, number>) {
   set(KEYS.penalties, data)
+}
+
+export function hasOnboarded(): boolean {
+  return localStorage.getItem(KEYS.onboarded) === 'true'
+}
+
+export function setOnboarded() {
+  localStorage.setItem(KEYS.onboarded, 'true')
 }
 
 export function todayKey(): string {
