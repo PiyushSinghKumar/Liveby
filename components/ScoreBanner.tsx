@@ -4,7 +4,7 @@ import { useMemo, useEffect, useState } from 'react'
 import { CheckinsData, StandardsData } from '@/lib/types'
 import { updateAppIcon } from '@/lib/appIcon'
 import { buildContext, getMotivation } from '@/lib/motivation'
-import { scoreTodayLive, scoreDay, rollingAvg, sparklineScores } from '@/lib/score'
+import { scoreTodayLive, scoreDay, rollingAvg, sparklineScores, lifetimeScore } from '@/lib/score'
 
 interface Props {
   checkins: CheckinsData
@@ -52,8 +52,9 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
 
   const rolling = useMemo(() => rollingAvg(checkins, standards, 7, penalties), [checkins, standards, penalties])
   const sparks = useMemo(() => sparklineScores(checkins, standards, 7, penalties), [checkins, standards, penalties])
+  const lifetime = useMemo(() => lifetimeScore(checkins, standards, penalties), [checkins, standards, penalties])
 
-  const level = getLevel(todayScore)
+  const level = getLevel(lifetime ?? todayScore)
 
   useEffect(() => { updateAppIcon(todayScore) }, [todayScore])
 
@@ -61,14 +62,16 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
     setQuote(getMotivation(buildContext(checkins, standards)))
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Trend: compare 7-day rolling avg against lifetime score
   const trend =
-    yesterdayScore === null ? null :
-    todayScore > yesterdayScore + 0.5 ? 'up' :
-    todayScore < yesterdayScore - 0.5 ? 'down' : 'flat'
+    lifetime === null || rolling === null ? null :
+    rolling > lifetime + 0.3 ? 'up' :
+    rolling < lifetime - 0.3 ? 'down' : 'flat'
 
   const hasCheckedInToday = Object.keys(todayCheckins).some(k => todayCheckins[k])
   const prevLevel = yesterdayScore !== null ? getLevel(yesterdayScore) : null
-  const levelDropped = hasCheckedInToday && prevLevel && prevLevel.label !== level.label &&
+  const levelDropped = hasCheckedInToday && lifetime !== null && prevLevel &&
+    prevLevel.label !== level.label &&
     LEVELS.findIndex(l => l.level.label === level.label) <
     LEVELS.findIndex(l => l.level.label === prevLevel!.label)
 
@@ -86,15 +89,27 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
         <div className="flex items-start gap-4">
           {/* Score */}
           <div className="flex-shrink-0">
+            {/* Lifetime score - primary */}
             <div className="flex items-end gap-1.5">
               <span className={`text-5xl font-black tabular-nums ${level.color}`}>
-                {todayScore.toFixed(1)}
+                {(lifetime ?? todayScore).toFixed(1)}
               </span>
               <span className="text-lg text-white/30 mb-1">/10</span>
               {trend === 'up' && <span className="text-emerald-400 text-lg mb-1">↑</span>}
               {trend === 'down' && <span className="text-red-400 text-lg mb-1">↓</span>}
+              {trend === 'flat' && <span className="text-white/30 text-lg mb-1">→</span>}
             </div>
             <p className={`text-sm font-semibold mt-0.5 ${level.color}`}>{level.label}</p>
+
+            {/* Today score - secondary */}
+            <p className="text-[11px] text-white/35 mt-1.5">
+              today{' '}
+              <span className={`font-semibold ${getLevel(todayScore).color}`}>
+                {todayScore.toFixed(1)}
+              </span>
+            </p>
+
+            {/* Sparkline */}
             <div className="flex items-end gap-0.5 h-6 mt-2">
               {sparks.map((s, i) => {
                 const h = s !== null ? Math.max(3, (s / 10) * 24) : 3
