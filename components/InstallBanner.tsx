@@ -10,6 +10,8 @@ export default function InstallBanner() {
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
+    // Running inside Capacitor native app - don't show
+    if ((window as unknown as Record<string, unknown>).Capacitor) return
     // Already installed as PWA - don't show
     if (window.matchMedia('(display-mode: standalone)').matches) return
     if (localStorage.getItem('liveby_install_dismissed')) return
