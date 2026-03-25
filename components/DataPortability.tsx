@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { exportData, importData } from '@/lib/storage'
+import { Share } from '@capacitor/share'
 
 interface Props {
   onImported: () => void
@@ -17,32 +18,22 @@ export default function DataPortability({ onImported }: Props) {
     const blob = new Blob([data], { type: 'application/json' })
     const file = new File([blob], filename, { type: 'application/json' })
 
-    // 1. Try native file share (modern browsers)
+    // 1. Capacitor native share (Android/iOS app)
+    if ((window as unknown as Record<string, unknown>).Capacitor) {
+      await Share.share({ title: 'Liveby Backup', text: data, dialogTitle: 'Save your Liveby backup' })
+      return
+    }
+
+    // 2. Web Share API with file (modern mobile browsers)
     if (navigator.canShare?.({ files: [file] })) {
       try {
         await navigator.share({ files: [file], title: 'Liveby Backup' })
         return
-      } catch { /* cancelled or unsupported, try next */ }
+      } catch { /* cancelled */ }
+      return
     }
 
-    // 2. Try text share (Capacitor WebView + most mobile browsers)
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'Liveby Backup', text: data })
-        return
-      } catch { /* cancelled or unsupported, try next */ }
-    }
-
-    // 3. Try clipboard copy
-    if (navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(data)
-        setMsg({ text: 'Backup copied to clipboard. Paste it into a note or email to save it.', ok: true })
-        return
-      } catch { /* fall through */ }
-    }
-
-    // 4. Desktop download fallback
+    // 3. Desktop download
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
