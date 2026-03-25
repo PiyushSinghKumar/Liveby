@@ -19,7 +19,7 @@ import EditModal from '@/components/EditModal'
 import CategoryModal from '@/components/CategoryModal'
 import ScoreBanner from '@/components/ScoreBanner'
 import ConfirmModal from '@/components/ConfirmModal'
-import DataPortability from '@/components/DataPortability'
+import DataPortability, { useAutoBackup } from '@/components/DataPortability'
 import InstallBanner from '@/components/InstallBanner'
 
 function computeStreaks(checkins: CheckinsData, standardIds: string[], today: string): Record<string, number> {
@@ -53,6 +53,7 @@ export default function Home() {
   const [affirmations, setAffirmations] = useState<Affirmation[]>([])
   const [penalties, setPenalties] = useState<Record<string, number>>({})
   const [showOnboarding, setShowOnboarding] = useState(false)
+  useAutoBackup()
   const [modal, setModal] = useState<ModalState>(null)
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)

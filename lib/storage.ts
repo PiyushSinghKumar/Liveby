@@ -6,6 +6,8 @@ const KEYS = {
   affirmations: 'liveby_affirmations',
   penalties: 'liveby_penalties',
   onboarded: 'liveby_onboarded',
+  autoBackup: 'liveby_auto_backup',
+  lastBackup: 'liveby_last_backup',
 }
 
 const DEFAULT_STANDARDS: StandardsData = {
@@ -89,6 +91,29 @@ export function importData(json: string): { ok: boolean; error?: string } {
   } catch {
     return { ok: false, error: 'Could not read the file. Make sure it is a valid Liveby backup.' }
   }
+}
+
+export type BackupInterval = 'daily' | 'weekly' | 'monthly'
+
+export interface AutoBackupSettings {
+  enabled: boolean
+  interval: BackupInterval
+}
+
+export function getAutoBackupSettings(): AutoBackupSettings {
+  return get(KEYS.autoBackup, { enabled: false, interval: 'weekly' as BackupInterval })
+}
+
+export function saveAutoBackupSettings(s: AutoBackupSettings) {
+  set(KEYS.autoBackup, s)
+}
+
+export function getLastBackupDate(): string | null {
+  return localStorage.getItem(KEYS.lastBackup)
+}
+
+export function setLastBackupDate(date: string) {
+  localStorage.setItem(KEYS.lastBackup, date)
 }
 
 export function todayKey(): string {
