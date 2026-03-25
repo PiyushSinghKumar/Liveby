@@ -88,18 +88,6 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
   return (
     <div className="flex flex-col gap-3">
       <div className={`rounded-2xl border ring-1 ${level.ring} ${level.bg} border-white/10 p-5`}>
-        {/* Profile avatar */}
-        <div className="flex justify-end mb-3">
-          <button
-            onClick={onEditProfile}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center transition"
-            title={profileName || 'Set your name'}
-          >
-            <span className={`text-sm font-bold ${level.color}`}>
-              {profileName ? profileName[0].toUpperCase() : '?'}
-            </span>
-          </button>
-        </div>
         <div className="flex items-start gap-4">
           {/* Score */}
           <div className="flex-shrink-0">
@@ -153,18 +141,31 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
           <div className="w-px self-stretch bg-white/10 flex-shrink-0" />
 
           {/* Quote */}
-          <div className="flex-1 flex items-start gap-2 min-w-0">
-            <div className={`flex-1 flex flex-col gap-1 transition-opacity duration-200 ${fading ? 'opacity-0' : 'opacity-100'}`}>
-              <p className="text-xs leading-relaxed text-white/50 italic">{quote}</p>
-              <p className="text-[10px] text-white/20">— future {profileName || 'you'}</p>
+          <div className="flex-1 flex flex-col gap-2 min-w-0">
+            <div className="flex items-start gap-2">
+              <div className={`flex-1 flex flex-col gap-1 transition-opacity duration-200 ${fading ? 'opacity-0' : 'opacity-100'}`}>
+                <p className="text-xs leading-relaxed text-white/50 italic">{quote}</p>
+              </div>
+              <button
+                onClick={refreshQuote}
+                className="flex-shrink-0 text-white/20 hover:text-white/60 active:text-white/80 transition text-sm"
+                title="New message"
+              >
+                ↻
+              </button>
             </div>
-            <button
-              onClick={refreshQuote}
-              className="flex-shrink-0 text-white/20 hover:text-white/60 active:text-white/80 transition text-sm"
-              title="New message"
-            >
-              ↻
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onEditProfile}
+                className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center transition flex-shrink-0"
+                title={profileName || 'Set your name'}
+              >
+                <span className={`text-[10px] font-bold ${level.color}`}>
+                  {profileName ? profileName[0].toUpperCase() : '?'}
+                </span>
+              </button>
+              <p className="text-[10px] text-white/20">future {profileName || 'you'}</p>
+            </div>
           </div>
         </div>
       </div>
