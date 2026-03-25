@@ -8,11 +8,12 @@ import {
   getAffirmations, saveAffirmations,
   getPenalties, savePenalties,
   hasOnboarded, setOnboarded,
-  getProfile, saveProfile,
+  getProfile, Profile,
   todayKey,
 } from '@/lib/storage'
 import OnboardingModal from '@/components/OnboardingModal'
 import ProfileSetup from '@/components/ProfileSetup'
+import ProfileMenu from '@/components/ProfileMenu'
 import CategoryCard from '@/components/CategoryCard'
 import { SUGGESTED_CATEGORIES } from '@/components/CategoryModal'
 import HeatmapCalendar from '@/components/HeatmapCalendar'
@@ -56,7 +57,8 @@ export default function Home() {
   const [penalties, setPenalties] = useState<Record<string, number>>({})
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showProfileSetup, setShowProfileSetup] = useState(false)
-  const [profileName, setProfileName] = useState('')
+  const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [profile, setProfile] = useState<Profile>({ name: '' })
   useAutoBackup()
   const [modal, setModal] = useState<ModalState>(null)
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
@@ -73,8 +75,7 @@ export default function Home() {
     setAffirmations(getAffirmations())
     setPenalties(getPenalties())
     if (!hasOnboarded()) setShowOnboarding(true)
-    const p = getProfile()
-    setProfileName(p.name)
+    setProfile(getProfile())
   }, [])
 
   const [today, setToday] = useState(todayKey)
@@ -279,15 +280,23 @@ export default function Home() {
     )}
     {showProfileSetup && (
       <ProfileSetup onDone={name => {
-        if (name) setProfileName(name)
+        if (name) setProfile(p => ({ ...p, name }))
         setShowProfileSetup(false)
       }} />
+    )}
+    {showProfileMenu && (
+      <ProfileMenu
+        profile={profile}
+        onClose={() => setShowProfileMenu(false)}
+        onEditName={() => setShowProfileSetup(true)}
+        onProfileChange={setProfile}
+      />
     )}
     <InstallBanner />
     <div className="min-h-screen max-w-5xl mx-auto flex flex-col">
       {/* Sticky header */}
       <div className="sticky top-0 z-30 bg-[#0d0d1a] px-4 pt-8 pb-4 flex flex-col gap-4">
-        <ScoreBanner checkins={checkins} standards={standards} todayKey={today} todayCheckins={todayCheckins} penalties={penalties} profileName={profileName} onEditProfile={() => setShowProfileSetup(true)} />
+        <ScoreBanner checkins={checkins} standards={standards} todayKey={today} todayCheckins={todayCheckins} penalties={penalties} profileName={profile.name} profilePhoto={profile.photo} onEditProfile={() => setShowProfileMenu(true)} />
 
         <div className="flex items-center gap-2 justify-center">
         <div className="flex gap-1 bg-white/5 rounded-xl p-1 w-fit">

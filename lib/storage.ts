@@ -119,6 +119,7 @@ export function setLastBackupDate(date: string) {
 
 export interface Profile {
   name: string
+  photo?: string  // base64 data URL
 }
 
 export function getProfile(): Profile {

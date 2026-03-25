@@ -13,6 +13,7 @@ interface Props {
   todayCheckins: Record<string, boolean>
   penalties?: Record<string, number>
   profileName?: string
+  profilePhoto?: string
   onEditProfile?: () => void
 }
 
@@ -41,7 +42,7 @@ function getLevel(score: number): Level {
   return LEVELS.find(l => score >= l.min && score <= l.max)!.level
 }
 
-export default function ScoreBanner({ checkins, standards, todayKey, todayCheckins, penalties, profileName, onEditProfile }: Props) {
+export default function ScoreBanner({ checkins, standards, todayKey, todayCheckins, penalties, profileName, profilePhoto, onEditProfile }: Props) {
   const [quote, setQuote] = useState(() => getMotivation(buildContext(checkins, standards)))
   const [fading, setFading] = useState(false)
 
@@ -157,12 +158,15 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
             <div className="flex items-center gap-2">
               <button
                 onClick={onEditProfile}
-                className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center transition flex-shrink-0"
+                className="w-6 h-6 rounded-full overflow-hidden bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center transition flex-shrink-0"
                 title={profileName || 'Set your name'}
               >
-                <span className={`text-[10px] font-bold ${level.color}`}>
-                  {profileName ? profileName[0].toUpperCase() : '?'}
-                </span>
+                {profilePhoto
+                  ? <img src={profilePhoto} alt="profile" className="w-full h-full object-cover" />
+                  : <span className={`text-[10px] font-bold ${level.color}`}>
+                      {profileName ? profileName[0].toUpperCase() : '?'}
+                    </span>
+                }
               </button>
               <p className="text-[10px] text-white/20">future {profileName || 'you'}</p>
             </div>
