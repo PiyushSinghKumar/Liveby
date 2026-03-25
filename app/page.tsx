@@ -20,6 +20,7 @@ import CategoryModal from '@/components/CategoryModal'
 import ScoreBanner from '@/components/ScoreBanner'
 import ConfirmModal from '@/components/ConfirmModal'
 import DataPortability from '@/components/DataPortability'
+import InstallBanner from '@/components/InstallBanner'
 
 function computeStreaks(checkins: CheckinsData, standardIds: string[], today: string): Record<string, number> {
   const streaks: Record<string, number> = {}
@@ -265,6 +266,7 @@ export default function Home() {
     {showOnboarding && (
       <OnboardingModal onDone={() => { setOnboarded(); setShowOnboarding(false) }} />
     )}
+    <InstallBanner />
     <div className="min-h-screen max-w-5xl mx-auto flex flex-col">
       {/* Sticky header */}
       <div className="sticky top-0 z-30 bg-[#0d0d1a] px-4 pt-8 pb-4 flex flex-col gap-4">
