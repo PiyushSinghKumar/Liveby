@@ -32,7 +32,8 @@ function resizeImage(file: File, size = 256): Promise<string> {
 }
 
 export default function ProfileMenu({ profile, onClose, onEditName, onProfileChange }: Props) {
-  const fileRef = useRef<HTMLInputElement>(null)
+  const cameraRef = useRef<HTMLInputElement>(null)
+  const galleryRef = useRef<HTMLInputElement>(null)
 
   async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -85,10 +86,16 @@ export default function ProfileMenu({ profile, onClose, onEditName, onProfileCha
         {/* Options */}
         <div className="flex flex-col px-4 gap-2">
           <button
-            onClick={() => { fileRef.current?.click() }}
+            onClick={() => cameraRef.current?.click()}
             className="w-full rounded-2xl bg-white/8 hover:bg-white/12 border border-white/10 text-white/70 font-medium py-4 transition text-sm"
           >
-            {profile.photo ? 'Change photo' : 'Add photo'}
+            Take a photo
+          </button>
+          <button
+            onClick={() => galleryRef.current?.click()}
+            className="w-full rounded-2xl bg-white/8 hover:bg-white/12 border border-white/10 text-white/70 font-medium py-4 transition text-sm"
+          >
+            Choose from gallery
           </button>
           <button
             onClick={() => { onClose(); onEditName() }}
@@ -112,7 +119,8 @@ export default function ProfileMenu({ profile, onClose, onEditName, onProfileCha
           </button>
         </div>
 
-        <input ref={fileRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handlePhoto} />
+        <input ref={cameraRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handlePhoto} />
+        <input ref={galleryRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
       </div>
     </>
   )
