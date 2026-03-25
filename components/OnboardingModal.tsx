@@ -82,6 +82,10 @@ export default function OnboardingModal({ onDone }: Props) {
   return (
     <div
       className={`fixed inset-0 z-50 flex flex-col bg-zinc-950 transition-opacity duration-300 ${exiting ? 'opacity-0' : 'opacity-100'}`}
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
