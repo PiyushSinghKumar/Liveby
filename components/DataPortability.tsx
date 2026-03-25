@@ -21,7 +21,7 @@ const INTERVAL_LABELS: Record<BackupInterval, string> = {
   monthly: 'Every month',
 }
 
-async function runExport(silent = false): Promise<void> {
+async function runExport(): Promise<void> {
   const filename = `liveby-backup-${new Date().toISOString().split('T')[0]}.json`
   const data = exportData()
   const blob = new Blob([data], { type: 'application/json' })
@@ -29,18 +29,12 @@ async function runExport(silent = false): Promise<void> {
   const isCapacitor = !!(window as unknown as Record<string, unknown>).Capacitor
 
   if (isCapacitor) {
-    if (silent) {
-      // Auto-backup: save silently to Documents
-      await Filesystem.writeFile({
-        path: filename,
-        data,
-        directory: Directory.Documents,
-        encoding: Encoding.UTF8,
-      })
-    } else {
-      // Manual: open share sheet so user can pick Drive, Dropbox, email etc.
-      await Share.share({ title: 'Liveby Backup', text: data, dialogTitle: 'Save your backup anywhere' })
-    }
+    await Filesystem.writeFile({
+      path: filename,
+      data,
+      directory: Directory.Documents,
+      encoding: Encoding.UTF8,
+    })
     return
   }
 
@@ -70,7 +64,7 @@ export function useAutoBackup() {
       : Infinity
 
     if (daysSince >= INTERVAL_DAYS[settings.interval]) {
-      runExport(true)
+      runExport()
         .then(() => setLastBackupDate(new Date().toISOString().split('T')[0]))
         .catch(() => {})
     }
@@ -145,7 +139,7 @@ export default function DataPortability({ onImported }: Props) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-white/60 font-medium">Auto backup</p>
-            <p className="text-xs text-white/30">Silently saves to Documents at your chosen interval</p>
+            <p className="text-xs text-white/30">Saves to your Documents folder automatically</p>
           </div>
           <button
             onClick={() => updateSettings({ enabled: !settings.enabled })}
