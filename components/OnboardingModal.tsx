@@ -11,7 +11,7 @@ const SLIDES = [
     icon: '👋',
     title: 'Hey, good to have you here.',
     body: 'Liveby is your personal space to show up for yourself every day. No pressure, no perfection - just small promises that add up to a life you\'re proud of.',
-    detail: 'Your data stays on your device. Nothing is sent anywhere. This is just between you and yourself.',
+    detail: 'Your data lives only on this device - nothing is sent anywhere. If you switch devices, use the Export backup option in the app to save your data first.',
   },
   {
     icon: '💭',

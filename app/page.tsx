@@ -19,6 +19,7 @@ import EditModal from '@/components/EditModal'
 import CategoryModal from '@/components/CategoryModal'
 import ScoreBanner from '@/components/ScoreBanner'
 import ConfirmModal from '@/components/ConfirmModal'
+import DataPortability from '@/components/DataPortability'
 
 function computeStreaks(checkins: CheckinsData, standardIds: string[], today: string): Record<string, number> {
   const streaks: Record<string, number> = {}
@@ -361,6 +362,13 @@ export default function Home() {
               onDelete={handleDeleteAffirmation}
             />
           </div>
+
+          <DataPortability onImported={() => {
+            setStandards(getStandards())
+            setCheckins(getCheckins())
+            setAffirmations(getAffirmations())
+            setPenalties(getPenalties())
+          }} />
         </div>
       )}
 

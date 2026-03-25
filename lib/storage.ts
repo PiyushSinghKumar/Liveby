@@ -66,6 +66,31 @@ export function setOnboarded() {
   localStorage.setItem(KEYS.onboarded, 'true')
 }
 
+export function exportData(): string {
+  return JSON.stringify({
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    standards: getStandards(),
+    checkins: getCheckins(),
+    affirmations: getAffirmations(),
+    penalties: getPenalties(),
+  }, null, 2)
+}
+
+export function importData(json: string): { ok: boolean; error?: string } {
+  try {
+    const data = JSON.parse(json)
+    if (!data.standards || !data.checkins) return { ok: false, error: 'Invalid backup file.' }
+    saveStandards(data.standards)
+    saveCheckins(data.checkins)
+    if (data.affirmations) saveAffirmations(data.affirmations)
+    if (data.penalties) savePenalties(data.penalties)
+    return { ok: true }
+  } catch {
+    return { ok: false, error: 'Could not read the file. Make sure it is a valid Liveby backup.' }
+  }
+}
+
 export function todayKey(): string {
   return new Date().toISOString().split('T')[0]
 }
