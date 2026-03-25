@@ -17,8 +17,10 @@ export default function DataPortability({ onImported }: Props) {
     const a = document.createElement('a')
     a.href = url
     a.download = `liveby-backup-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
     a.click()
-    URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
 
   function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
