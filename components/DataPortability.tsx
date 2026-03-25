@@ -11,12 +11,24 @@ export default function DataPortability({ onImported }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null)
 
-  function handleExport() {
+  async function handleExport() {
+    const filename = `liveby-backup-${new Date().toISOString().split('T')[0]}.json`
     const blob = new Blob([exportData()], { type: 'application/json' })
+    const file = new File([blob], filename, { type: 'application/json' })
+
+    if (navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'Liveby Backup' })
+        return
+      } catch {
+        // user cancelled or share failed, fall through to download
+      }
+    }
+
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `liveby-backup-${new Date().toISOString().split('T')[0]}.json`
+    a.download = filename
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
