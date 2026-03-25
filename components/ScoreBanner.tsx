@@ -13,6 +13,7 @@ interface Props {
   todayCheckins: Record<string, boolean>
   penalties?: Record<string, number>
   profileName?: string
+  onEditProfile?: () => void
 }
 
 type Level = { label: string; color: string; ring: string; bg: string; text: string }
@@ -40,7 +41,7 @@ function getLevel(score: number): Level {
   return LEVELS.find(l => score >= l.min && score <= l.max)!.level
 }
 
-export default function ScoreBanner({ checkins, standards, todayKey, todayCheckins, penalties, profileName }: Props) {
+export default function ScoreBanner({ checkins, standards, todayKey, todayCheckins, penalties, profileName, onEditProfile }: Props) {
   const [quote, setQuote] = useState(() => getMotivation(buildContext(checkins, standards)))
   const [fading, setFading] = useState(false)
 
@@ -87,6 +88,18 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
   return (
     <div className="flex flex-col gap-3">
       <div className={`rounded-2xl border ring-1 ${level.ring} ${level.bg} border-white/10 p-5`}>
+        {/* Profile avatar */}
+        <div className="flex justify-end mb-3">
+          <button
+            onClick={onEditProfile}
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center transition"
+            title={profileName || 'Set your name'}
+          >
+            <span className={`text-sm font-bold ${level.color}`}>
+              {profileName ? profileName[0].toUpperCase() : '?'}
+            </span>
+          </button>
+        </div>
         <div className="flex items-start gap-4">
           {/* Score */}
           <div className="flex-shrink-0">
