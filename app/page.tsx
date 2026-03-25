@@ -258,14 +258,20 @@ export default function Home() {
     })
   }
 
-  function handleAddAffirmation(text: string, category: string) {
+  function handleAddAffirmation(text: string) {
     const newItem: Affirmation = {
       id: Date.now().toString(),
       text,
-      category,
+      category: '',
       createdAt: new Date().toISOString(),
     }
     const updated = [...affirmations, newItem]
+    setAffirmations(updated)
+    saveAffirmations(updated)
+  }
+
+  function handleEditAffirmation(id: string, text: string) {
+    const updated = affirmations.map(a => a.id === id ? { ...a, text } : a)
     setAffirmations(updated)
     saveAffirmations(updated)
   }
@@ -423,8 +429,8 @@ export default function Home() {
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
             <AffirmationsPanel
               affirmations={affirmations}
-              categoryLabels={categoryLabels}
               onAdd={handleAddAffirmation}
+              onEdit={handleEditAffirmation}
               onDelete={handleDeleteAffirmation}
             />
           </div>
