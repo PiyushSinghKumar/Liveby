@@ -19,19 +19,19 @@ type Level = { label: string; color: string; ring: string; bg: string; text: str
 const LEVELS: { min: number; max: number; level: Level }[] = [
   {
     min: 0, max: 2.4,
-    level: { label: 'Are you kidding me', color: 'text-red-400', ring: 'ring-red-500/50', bg: 'bg-red-500/10', text: 'text-red-300' },
+    level: { label: 'Come back to me', color: 'text-red-400', ring: 'ring-red-500/50', bg: 'bg-red-500/10', text: 'text-red-300' },
   },
   {
     min: 2.5, max: 4.9,
-    level: { label: 'Poor', color: 'text-orange-400', ring: 'ring-orange-500/50', bg: 'bg-orange-500/10', text: 'text-orange-300' },
+    level: { label: "I know you can do more", color: 'text-orange-400', ring: 'ring-orange-500/50', bg: 'bg-orange-500/10', text: 'text-orange-300' },
   },
   {
     min: 5, max: 7.4,
-    level: { label: 'Okay', color: 'text-yellow-400', ring: 'ring-yellow-500/50', bg: 'bg-yellow-500/10', text: 'text-yellow-300' },
+    level: { label: "We're getting there", color: 'text-yellow-400', ring: 'ring-yellow-500/50', bg: 'bg-yellow-500/10', text: 'text-yellow-300' },
   },
   {
     min: 7.5, max: 10,
-    level: { label: 'Good', color: 'text-emerald-400', ring: 'ring-emerald-500/50', bg: 'bg-emerald-500/10', text: 'text-emerald-300' },
+    level: { label: 'This is who we are', color: 'text-emerald-400', ring: 'ring-emerald-500/50', bg: 'bg-emerald-500/10', text: 'text-emerald-300' },
   },
 ]
 
@@ -120,9 +120,9 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
                     style={{ height: `${h}px` }}
                     className={`w-2 rounded-sm transition-all ${
                       s === null ? 'bg-white/10' :
-                      lv?.label === 'Good' ? 'bg-emerald-400' :
-                      lv?.label === 'Okay' ? 'bg-yellow-400' :
-                      lv?.label === 'Poor' ? 'bg-orange-400' : 'bg-red-400'
+                      lv?.label === 'This is who we are' ? 'bg-emerald-400' :
+                      lv?.label === "We're getting there" ? 'bg-yellow-400' :
+                      lv?.label === 'I know you can do more' ? 'bg-orange-400' : 'bg-red-400'
                     }`}
                   />
                 )
@@ -130,7 +130,7 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
             </div>
             {rolling !== null && (
               <p className="text-[11px] text-white/35 mt-1">
-                7d avg <span className="text-white/55 font-semibold">{rolling.toFixed(1)}</span>
+                last 7 days <span className="text-white/55 font-semibold">{rolling.toFixed(1)}</span>
               </p>
             )}
           </div>
@@ -140,9 +140,10 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
 
           {/* Quote */}
           <div className="flex-1 flex items-start gap-2 min-w-0">
-            <p className={`flex-1 text-xs leading-relaxed text-white/50 italic transition-opacity duration-200 ${fading ? 'opacity-0' : 'opacity-100'}`}>
-              {quote}
-            </p>
+            <div className={`flex-1 flex flex-col gap-1 transition-opacity duration-200 ${fading ? 'opacity-0' : 'opacity-100'}`}>
+              <p className="text-xs leading-relaxed text-white/50 italic">{quote}</p>
+              <p className="text-[10px] text-white/20">— future you</p>
+            </div>
             <button
               onClick={refreshQuote}
               className="flex-shrink-0 text-white/20 hover:text-white/60 active:text-white/80 transition text-sm"
@@ -158,7 +159,7 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 flex items-center gap-2">
           <span className="text-red-400 text-base">⚠</span>
           <p className="text-sm text-red-300">
-            Score dropped from <strong>{prevLevel!.label}</strong> to <strong>{level.label}</strong>. Get back on track.
+            You slipped a level. Your future self knows you can turn this around today.
           </p>
         </div>
       )}
