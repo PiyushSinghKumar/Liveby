@@ -111,7 +111,13 @@ export default function OnboardingModal({ onDone }: Props) {
       </div>
 
       {isLast && (
-        <p className="text-xs text-white/20 text-center">Made by Piyush Kumar Singh</p>
+        <div className="text-center flex flex-col gap-1 px-8">
+          <p className="text-sm text-white/50">Thank you for being here.</p>
+          <p className="text-xs text-white/30 leading-relaxed">
+            This app was built with the hope that it helps you live a little more intentionally every day. Enjoy the journey.
+          </p>
+          <p className="text-xs text-white/20 mt-1">- Piyush Kumar Singh</p>
+        </div>
       )}
 
       {/* Bottom nav */}
