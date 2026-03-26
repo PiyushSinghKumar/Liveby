@@ -43,6 +43,24 @@ const SLIDES = [
     body: 'It builds up quietly over time across every day you\'ve used the app. Good days lift it. Rough days barely move it.',
     detail: 'What\'s a good score? Any score you earned by actually showing up. Even a 6 today beats a 10 you never had.',
   },
+  {
+    icon: '✨',
+    title: 'Affirmations keep you grounded',
+    body: 'Add a few lines you want to read every day — a reminder of who you are and what you\'re working toward. They sit right at the top of your home screen.',
+    detail: 'Tap the affirmations area at the top of the app to add or edit them anytime.',
+  },
+  {
+    icon: '🔔',
+    title: 'Let the app remind you',
+    body: 'Turn on daily reminders so you don\'t forget to check in. You pick the times — morning, midday, evening, whatever works for you.',
+    detail: 'Go to Settings (⚙ icon) → Daily reminder to set this up. Off by default.',
+  },
+  {
+    icon: '💾',
+    title: 'Back up your data',
+    body: 'Everything lives only on your device. If you clear your browser or switch devices, your data is gone unless you\'ve exported it.',
+    detail: 'Go to Settings → Your data → Export backup. Do this regularly. It takes two seconds.',
+  },
 ]
 
 export default function OnboardingModal({ onDone }: Props) {

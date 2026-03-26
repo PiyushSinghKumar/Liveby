@@ -15,7 +15,7 @@ const DEFAULT_TIMES = ['09:00', '13:00', '17:00', '21:00']
 export function getReminderSettings(): ReminderSettings {
   try {
     const raw = localStorage.getItem(KEY)
-    if (!raw) return { enabled: true, times: DEFAULT_TIMES }
+    if (!raw) return { enabled: false, times: DEFAULT_TIMES }
     const parsed = JSON.parse(raw)
     // Migrate old single-time format
     if (parsed.time && !parsed.times) {
