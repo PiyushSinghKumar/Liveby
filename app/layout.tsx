@@ -37,6 +37,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js');
           }
+          window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            window._deferredInstallPrompt = e;
+          });
         `}} />
         <ThemeProvider>
           <div className="border-t-2 border-indigo-500/40 bg-bg" style={{ paddingTop: 'env(safe-area-inset-top)' }} />

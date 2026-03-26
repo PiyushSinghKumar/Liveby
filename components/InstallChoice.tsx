@@ -35,6 +35,13 @@ export default function InstallChoice({ onDone }: Props) {
     setPlatform(plat)
     if (plat === 'android' && !isChromeBrowser()) setNeedsChrome(true)
 
+    // Pick up prompt captured early in layout script (before React mounted)
+    const early = (window as unknown as Record<string, unknown>)._deferredInstallPrompt
+    if (early) {
+      deferredPrompt.current = early as typeof deferredPrompt.current
+      setCanInstall(true)
+    }
+
     const handler = (e: Event) => {
       e.preventDefault()
       deferredPrompt.current = e as typeof deferredPrompt.current
