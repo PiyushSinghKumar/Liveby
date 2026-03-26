@@ -1,11 +1,7 @@
-const CACHE = 'liveby-v2'
+const CACHE = 'liveby-v3'
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE)
-      .then(cache => cache.addAll(['/']))
-      .then(() => self.skipWaiting())
-  )
+self.addEventListener('install', () => {
+  self.skipWaiting()
 })
 
 self.addEventListener('activate', e => {
