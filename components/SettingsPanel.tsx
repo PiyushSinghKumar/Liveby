@@ -67,6 +67,8 @@ export default function SettingsPanel({ onClose }: Props) {
     const standalone = window.matchMedia('(display-mode: standalone)').matches
     setIsStandalone(isCapacitor || standalone)
     setIsIOS(/iphone|ipad|ipod/i.test(navigator.userAgent))
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
   }, [])
 
   async function handleReminderToggle() {
@@ -128,7 +130,7 @@ export default function SettingsPanel({ onClose }: Props) {
           <div className="w-10 h-1 rounded-full bg-fill-2" />
         </div>
 
-        <div className="flex flex-col px-5 pb-2 gap-5">
+        <div className="flex flex-col px-5 pb-2 gap-5 overflow-y-auto max-h-[80vh]">
           <h2 className="text-base font-bold text-ink pt-2">Settings</h2>
 
           {/* Theme */}
