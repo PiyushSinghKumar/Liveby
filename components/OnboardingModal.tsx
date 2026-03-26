@@ -89,9 +89,15 @@ export default function OnboardingModal({ onDone }: Props) {
 
   function handleTouchEnd(e: React.TouchEvent) {
     if (touchStartX.current === null) return
-    const diff = touchStartX.current - e.changedTouches[0].clientX
+    const endX = e.changedTouches[0].clientX
+    const diff = touchStartX.current - endX
     touchStartX.current = null
-    if (Math.abs(diff) < 50) return
+    if (Math.abs(diff) < 50) {
+      // Tap — use screen half to decide direction
+      if (endX < window.innerWidth / 2) { if (slide > 0) setSlide(slide - 1) }
+      else next()
+      return
+    }
     if (diff > 0) next()
     else if (slide > 0) setSlide(slide - 1)
   }
