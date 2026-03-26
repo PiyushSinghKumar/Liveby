@@ -13,6 +13,7 @@ interface Props {
   checkins: CheckinsData
   standards: StandardsData
   penalties?: Record<string, number>
+  onWeeklySummary?: () => void
 }
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -73,7 +74,7 @@ function monthStats(year: number, month: number, checkins: CheckinsData, standar
   }
 }
 
-export default function HeatmapCalendar({ checkins, standards, penalties }: Props) {
+export default function HeatmapCalendar({ checkins, standards, penalties, onWeeklySummary }: Props) {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
@@ -119,6 +120,15 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
 
   return (
     <div className="flex flex-col gap-4">
+      {onWeeklySummary && (
+        <button
+          onClick={onWeeklySummary}
+          className="w-full rounded-2xl border border-line bg-fill text-ink-2 hover:text-ink hover:border-line-2 font-medium py-3 text-sm transition"
+        >
+          Last 7 days summary
+        </button>
+      )}
+
       {/* Month card */}
       <div className="rounded-2xl border border-line bg-fill p-5">
         {/* Header */}
@@ -280,25 +290,58 @@ export default function HeatmapCalendar({ checkins, standards, penalties }: Prop
               )}
             </div>
             {selectedPct !== null && (
-              <div className="flex flex-col gap-2">
-                {standards.categories.map(cat => {
-                  const catIds = cat.standards.map(s => s.id)
-                  const catDone = catIds.filter(id => selectedCheckins[id]).length
-                  const catPct = catIds.length > 0 ? catDone / catIds.length : 0
-                  return (
-                    <div key={cat.id} className="flex items-center gap-3">
-                      <span className="text-sm w-4">{cat.icon}</span>
-                      <span className="text-xs text-ink-2 w-24">{cat.label}</span>
-                      <div className="flex-1 h-1.5 bg-fill-2 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${catPct * 100}%`, backgroundColor: catColor(cat.color) }}
-                        />
+              <div className="flex flex-col gap-4">
+                {/* Category bars */}
+                <div className="flex flex-col gap-2">
+                  {standards.categories.map(cat => {
+                    const catIds = cat.standards.map(s => s.id)
+                    const catDone = catIds.filter(id => selectedCheckins[id]).length
+                    const catPct = catIds.length > 0 ? catDone / catIds.length : 0
+                    return (
+                      <div key={cat.id} className="flex items-center gap-3">
+                        <span className="text-sm w-4">{cat.icon}</span>
+                        <span className="text-xs text-ink-2 w-24">{cat.label}</span>
+                        <div className="flex-1 h-1.5 bg-fill-2 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{ width: `${catPct * 100}%`, backgroundColor: catColor(cat.color) }}
+                          />
+                        </div>
+                        <span className="text-xs text-ink-3 w-12 text-right">{catDone}/{catIds.length}</span>
                       </div>
-                      <span className="text-xs text-ink-3 w-12 text-right">{catDone}/{catIds.length}</span>
+                    )
+                  })}
+                </div>
+
+                {/* Individual promises */}
+                <div className="flex flex-col gap-3">
+                  {standards.categories.map(cat => (
+                    <div key={cat.id}>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <span className="text-xs">{cat.icon}</span>
+                        <span className="text-xs font-semibold text-ink-3" style={{ color: catColor(cat.color) }}>{cat.label}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        {cat.standards.map(s => {
+                          const done = !!selectedCheckins[s.id]
+                          return (
+                            <div key={s.id} className="flex items-center gap-2">
+                              <span className={`text-sm flex-shrink-0 ${done ? 'text-emerald-400' : 'text-ink-4'}`}>
+                                {done ? '✓' : '✗'}
+                              </span>
+                              <span className={`text-xs leading-relaxed ${done ? 'text-ink-2' : 'text-ink-4 line-through decoration-ink-4/40'}`}>
+                                {s.text}
+                              </span>
+                              {s.type === 'soft' && (
+                                <span className="text-[10px] text-sky-400/60 flex-shrink-0">soft</span>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
-                  )
-                })}
+                  ))}
+                </div>
               </div>
             )}
           </div>

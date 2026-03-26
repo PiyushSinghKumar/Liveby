@@ -28,6 +28,8 @@ import CategoryModal from '@/components/CategoryModal'
 import ScoreBanner from '@/components/ScoreBanner'
 import ConfirmModal from '@/components/ConfirmModal'
 import DataPortability, { useAutoBackup } from '@/components/DataPortability'
+import WeeklySummary from '@/components/WeeklySummary'
+import TemplatesModal, { Template } from '@/components/TemplatesModal'
 
 function computeStreaks(checkins: CheckinsData, standardIds: string[], today: string): Record<string, number> {
   const streaks: Record<string, number> = {}
@@ -67,6 +69,8 @@ export default function Home() {
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [profile, setProfile] = useState<Profile>({ name: '' })
+  const [showWeeklySummary, setShowWeeklySummary] = useState(false)
+  const [showTemplates, setShowTemplates] = useState(false)
   useAutoBackup()
 
   // On native: request permission and apply scheduled notifications on startup
@@ -253,6 +257,20 @@ export default function Home() {
     })
   }
 
+  function handleAddTemplate(template: Template) {
+    if (!standards) return
+    const id = template.label.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now()
+    const newStandards = template.promises.map((p, i) => ({
+      id: `${id}_p${i}`,
+      text: p.text,
+      type: p.type,
+      createdAt: today,
+    }))
+    handleSaveStandards({
+      categories: [...standards.categories, { id, label: template.label, icon: template.icon, color: template.color, standards: newStandards }],
+    })
+  }
+
   function handleEditCategory(categoryId: string) {
     setEditingCategoryId(categoryId)
   }
@@ -363,6 +381,12 @@ export default function Home() {
       }} />
     )}
     {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+    {showWeeklySummary && (
+      <WeeklySummary checkins={checkins} standards={standards} penalties={penalties} onClose={() => setShowWeeklySummary(false)} />
+    )}
+    {showTemplates && (
+      <TemplatesModal standards={standards} onAdd={handleAddTemplate} onClose={() => setShowTemplates(false)} />
+    )}
     {showProfileMenu && (
       <ProfileMenu
         profile={profile}
@@ -461,6 +485,13 @@ export default function Home() {
                     <span>✏️</span>
                     <span>Custom</span>
                   </button>
+                  <button
+                    onClick={() => setShowTemplates(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-indigo-400/40 bg-indigo-500/10 hover:bg-indigo-500/20 hover:border-indigo-400/60 active:bg-indigo-500/25 transition text-sm text-indigo-400"
+                  >
+                    <span>📋</span>
+                    <span>Templates</span>
+                  </button>
                 </div>
               </div>
             )
@@ -486,7 +517,7 @@ export default function Home() {
       )}
 
       {tab === 'calendar' && (
-        <HeatmapCalendar checkins={checkins} standards={standards} penalties={penalties} />
+        <HeatmapCalendar checkins={checkins} standards={standards} penalties={penalties} onWeeklySummary={() => setShowWeeklySummary(true)} />
       )}
 
       <EditModal
