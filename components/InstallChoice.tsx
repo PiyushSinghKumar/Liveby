@@ -16,9 +16,13 @@ function getPlatform(): Platform {
   return 'unknown'
 }
 
-function isChromeBrowser(): boolean {
+function isIOSSafari(): boolean {
   const ua = navigator.userAgent
-  // Must have Chrome but not Chromium-based MIUI/Samsung/Opera/Edge misidentified
+  return /iphone|ipad|ipod/i.test(ua) && /safari/i.test(ua) && !/crios|fxios|opios|edgios/i.test(ua)
+}
+
+function isAndroidChrome(): boolean {
+  const ua = navigator.userAgent
   return /android/i.test(ua) && /chrome\/\d/i.test(ua) && !/miuibrowser|samsungbrowser|opr\/|edg\//i.test(ua)
 }
 
@@ -27,10 +31,13 @@ export default function InstallChoice({ onDone }: Props) {
   const [showIOSSteps, setShowIOSSteps] = useState(false)
   const [showAndroidHint, setShowAndroidHint] = useState(false)
   const [needsChrome, setNeedsChrome] = useState(false)
+  const [needsSafari, setNeedsSafari] = useState(false)
+
   useEffect(() => {
     const plat = getPlatform()
     setPlatform(plat)
-    if (plat === 'android' && !isChromeBrowser()) setNeedsChrome(true)
+    if (plat === 'android' && !isAndroidChrome()) setNeedsChrome(true)
+    if (plat === 'ios' && !isIOSSafari()) setNeedsSafari(true)
   }, [])
 
   function handleInstall() {
@@ -48,12 +55,12 @@ export default function InstallChoice({ onDone }: Props) {
   if (showAndroidHint) {
     const steps = needsChrome
       ? [
-          { step: '1', text: <>Open <span className="text-ink font-medium">Chrome</span> on your device (install it from Play Store if needed)</> },
+          { step: '1', text: <>Open <span className="text-ink font-medium">Chrome</span> on your device</> },
           { step: '2', text: <>Go to <span className="text-ink font-medium select-all">liveby.vercel.app</span></> },
-          { step: '3', text: <>Tap the <span className="text-ink font-medium">three dots</span> menu ⋮ → <span className="text-ink font-medium">Add to Home screen</span></> },
+          { step: '3', text: <>Tap the <span className="text-ink font-medium">three dots</span> menu → <span className="text-ink font-medium">Add to Home screen</span></> },
         ]
       : [
-          { step: '1', text: <>Tap the <span className="text-ink font-medium">three dots</span> menu in Chrome ⋮</> },
+          { step: '1', text: <>Tap the <span className="text-ink font-medium">three dots</span> menu ⋮</> },
           { step: '2', text: <>Tap <span className="text-ink font-medium">Add to Home screen</span></> },
           { step: '3', text: <>Tap <span className="text-ink font-medium">Add</span> to confirm</> },
         ]
@@ -74,9 +81,7 @@ export default function InstallChoice({ onDone }: Props) {
               {needsChrome ? 'Open in Chrome to install' : 'Add to your home screen'}
             </h2>
             <p className="text-sm text-ink-3">
-              {needsChrome
-                ? 'Your current browser doesn\'t support app install — Chrome does'
-                : 'Takes 3 seconds, works like a real app'}
+              {needsChrome ? 'Your current browser does not support app install. Chrome does.' : 'Takes 3 seconds, works like a real app.'}
             </p>
           </div>
           <div className="flex flex-col gap-3 w-full text-left">
@@ -101,6 +106,18 @@ export default function InstallChoice({ onDone }: Props) {
   }
 
   if (showIOSSteps) {
+    const steps = needsSafari
+      ? [
+          { step: '1', text: <>Copy this link: <span className="text-ink font-medium select-all">liveby.vercel.app</span></> },
+          { step: '2', text: <>Open <span className="text-ink font-medium">Safari</span> and paste it. Only Safari can install web apps on iPhone.</> },
+          { step: '3', text: <>Tap the <span className="text-ink font-medium">Share</span> button at the bottom, then <span className="text-ink font-medium">Add to Home Screen</span>.</> },
+        ]
+      : [
+          { step: '1', text: <>Tap the <span className="text-ink font-medium">Share</span> button at the bottom of Safari ⎋</> },
+          { step: '2', text: <>Scroll down and tap <span className="text-ink font-medium">Add to Home Screen</span></> },
+          { step: '3', text: <>Tap <span className="text-ink font-medium">Add</span> in the top right</> },
+        ]
+
     return (
       <div
         className="fixed inset-0 z-60 flex flex-col items-center justify-between bg-bg"
@@ -113,15 +130,15 @@ export default function InstallChoice({ onDone }: Props) {
         <div className="flex flex-col items-center gap-8 px-8 text-center max-w-sm w-full">
           <div className="text-5xl">📱</div>
           <div className="flex flex-col gap-2">
-            <h2 className="text-2xl font-bold text-ink">Add to your home screen</h2>
-            <p className="text-sm text-ink-3">Three quick steps in Safari</p>
+            <h2 className="text-2xl font-bold text-ink">
+              {needsSafari ? 'Open in Safari to install' : 'Add to your home screen'}
+            </h2>
+            <p className="text-sm text-ink-3">
+              {needsSafari ? 'Chrome and Brave on iPhone cannot install web apps. Safari can.' : 'Three quick steps in Safari.'}
+            </p>
           </div>
           <div className="flex flex-col gap-3 w-full text-left">
-            {[
-              { step: '1', text: <>Tap the <span className="text-ink font-medium">Share</span> button at the bottom of Safari ⎋</> },
-              { step: '2', text: <>Scroll and tap <span className="text-ink font-medium">Add to Home Screen</span></> },
-              { step: '3', text: <>Tap <span className="text-ink font-medium">Add</span> in the top right</> },
-            ].map(({ step, text }) => (
+            {steps.map(({ step, text }) => (
               <div key={step} className="flex items-center gap-4 bg-fill border border-line rounded-2xl px-4 py-3">
                 <span className="text-indigo-400 font-bold text-base w-4 flex-shrink-0">{step}</span>
                 <p className="text-sm text-ink-2 leading-relaxed">{text}</p>
@@ -141,7 +158,6 @@ export default function InstallChoice({ onDone }: Props) {
     )
   }
 
-  // Always show install option on mobile; on desktop only when the browser supports it
   const showInstallOption = platform === 'ios' || platform === 'android'
 
   return (

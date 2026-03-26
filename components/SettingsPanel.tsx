@@ -57,6 +57,7 @@ export default function SettingsPanel({ onClose }: Props) {
   const [reminder, setReminder] = useState<ReminderSettings>(getReminderSettings)
   const [reminderPermDenied, setReminderPermDenied] = useState(false)
   const [isStandalone, setIsStandalone] = useState(true)
+  const [isIOS, setIsIOS] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -65,6 +66,7 @@ export default function SettingsPanel({ onClose }: Props) {
     const isCapacitor = !!(window as unknown as Record<string, unknown>).Capacitor
     const standalone = window.matchMedia('(display-mode: standalone)').matches
     setIsStandalone(isCapacitor || standalone)
+    setIsIOS(/iphone|ipad|ipod/i.test(navigator.userAgent))
   }, [])
 
   async function handleReminderToggle() {
@@ -254,8 +256,17 @@ export default function SettingsPanel({ onClose }: Props) {
           {!isStandalone && (
             <div className="flex flex-col gap-2 bg-fill border border-line rounded-2xl px-4 py-3 text-sm text-ink-2">
               <p className="font-medium text-ink">Install app</p>
-              <p>Tap the browser menu <span className="font-medium text-ink">⋮</span> → <span className="font-medium text-ink">Add to Home screen</span></p>
-              <p className="text-ink-3 text-xs">Use Chrome for the best experience on Android.</p>
+              {isIOS ? (
+                <>
+                  <p>Open this page in <span className="font-medium text-ink">Safari</span>, tap the Share button, then <span className="font-medium text-ink">Add to Home Screen</span>.</p>
+                  <p className="text-ink-3 text-xs">Chrome and Brave on iPhone cannot install web apps. Safari can.</p>
+                </>
+              ) : (
+                <>
+                  <p>Tap the <span className="font-medium text-ink">three dots</span> menu ⋮ → <span className="font-medium text-ink">Add to Home screen</span></p>
+                  <p className="text-ink-3 text-xs">Use Chrome for the best experience on Android.</p>
+                </>
+              )}
             </div>
           )}
 
