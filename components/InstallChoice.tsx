@@ -21,9 +21,11 @@ function isIOSSafari(): boolean {
   return /iphone|ipad|ipod/i.test(ua) && /safari/i.test(ua) && !/crios|fxios|opios|edgios/i.test(ua)
 }
 
-function isAndroidChrome(): boolean {
+function supportsAndroidInstall(): boolean {
   const ua = navigator.userAgent
-  return /android/i.test(ua) && /chrome\/\d/i.test(ua) && !/miuibrowser|samsungbrowser|opr\/|edg\//i.test(ua)
+  // All Chromium-based browsers on Android include "Chrome/" in the UA
+  // Firefox does not, so this correctly excludes it
+  return /android/i.test(ua) && /chrome\/\d/i.test(ua)
 }
 
 export default function InstallChoice({ onDone }: Props) {
@@ -36,7 +38,7 @@ export default function InstallChoice({ onDone }: Props) {
   useEffect(() => {
     const plat = getPlatform()
     setPlatform(plat)
-    if (plat === 'android' && !isAndroidChrome()) setNeedsChrome(true)
+    if (plat === 'android' && !supportsAndroidInstall()) setNeedsChrome(true)
     if (plat === 'ios' && !isIOSSafari()) setNeedsSafari(true)
   }, [])
 
@@ -55,7 +57,7 @@ export default function InstallChoice({ onDone }: Props) {
   if (showAndroidHint) {
     const steps = needsChrome
       ? [
-          { step: '1', text: <>Open <span className="text-ink font-medium">Chrome</span> on your device</> },
+          { step: '1', text: <>Open <span className="text-ink font-medium">Chrome or Brave</span> on your device</> },
           { step: '2', text: <>Go to <span className="text-ink font-medium select-all">liveby.vercel.app</span></> },
           { step: '3', text: <>Tap the <span className="text-ink font-medium">three dots</span> menu → <span className="text-ink font-medium">Add to Home screen</span></> },
         ]
@@ -81,7 +83,7 @@ export default function InstallChoice({ onDone }: Props) {
               {needsChrome ? 'Open in Chrome to install' : 'Add to your home screen'}
             </h2>
             <p className="text-sm text-ink-3">
-              {needsChrome ? 'Your current browser does not support app install. Chrome does.' : 'Takes 3 seconds, works like a real app.'}
+              {needsChrome ? 'This browser does not support installing apps. Chrome or Brave do.' : 'Takes 3 seconds, works like a real app.'}
             </p>
           </div>
           <div className="flex flex-col gap-3 w-full text-left">

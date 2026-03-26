@@ -264,7 +264,7 @@ export default function SettingsPanel({ onClose }: Props) {
               ) : (
                 <>
                   <p>Tap the <span className="font-medium text-ink">three dots</span> menu ⋮ → <span className="font-medium text-ink">Add to Home screen</span></p>
-                  <p className="text-ink-3 text-xs">Use Chrome for the best experience on Android.</p>
+                  <p className="text-ink-3 text-xs">Use Chrome or Brave on Android.</p>
                 </>
               )}
             </div>
