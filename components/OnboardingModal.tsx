@@ -10,56 +10,59 @@ const SLIDES = [
   {
     icon: '👋',
     title: 'Hey, good to have you here.',
-    body: 'Liveby is your personal space to show up for yourself every day. No pressure, no perfection - just small promises that add up to a life you\'re proud of.',
-    detail: 'Your data lives only on this device - nothing is sent anywhere. If you switch devices, use the Export backup option in the app to save your data first.',
+    body: 'Liveby is your personal space to show up for yourself every day. No pressure, no perfection, just small promises that add up to a life you\'re proud of.',
+    detail: [
+      'Install it like an app: tap the three-dot menu in Chrome and tap Add to Home Screen. It opens full-screen with no browser bar, just like a native app.',
+      'Your data lives only on this device. If you switch devices, export a backup from Settings first.',
+    ],
   },
   {
     icon: '💭',
     title: 'What do you actually want to do more of?',
     body: 'Exercise? Read? Call your family? Sleep on time? Pick the things that matter to you and turn them into promises to yourself.',
-    detail: 'Start with 3 to 5 promises, not 20. It\'s easier to build up than to burn out on day one.',
+    detail: ['Start with 3 to 5 promises, not 20. It\'s easier to build up than to burn out on day one.'],
   },
   {
     icon: '📂',
     title: 'Group them however makes sense to you',
     body: 'Put your promises into areas of your life - Health, Work, Family, whatever fits. There are no right or wrong categories.',
-    detail: 'Can you change them later? Absolutely. Add, remove, rename anytime. This is your space.',
+    detail: ['Can you change them later? Absolutely. Add, remove, rename anytime. This is your space.'],
   },
   {
     icon: '❤️',
     title: 'Some promises mean more than others',
     body: 'Mark the ones you truly cannot compromise on as Hard. The nice-to-haves are Soft. Liveby weights them differently so your score reflects what actually matters.',
-    detail: 'What happens if you break a hard promise? You can still remove it, but you\'ll choose whether it was fulfilled or given up. That honesty is the whole point.',
+    detail: ['What happens if you break a hard promise? You can still remove it, but you\'ll choose whether it was fulfilled or given up. That honesty is the whole point.'],
   },
   {
     icon: '🌅',
     title: 'Each day is a fresh start',
     body: 'At the end of the day, just tick off what you did. No guilt about what you didn\'t - tomorrow is right there waiting.',
-    detail: 'What if I miss a few days? Just come back. The app won\'t shame you. Your score will wait patiently.',
+    detail: ['What if I miss a few days? Just come back. The app won\'t shame you. Your score will wait patiently.'],
   },
   {
     icon: '🌱',
     title: 'Your score is your story',
     body: 'It builds up quietly over time across every day you\'ve used the app. Good days lift it. Rough days barely move it.',
-    detail: 'What\'s a good score? Any score you earned by actually showing up. Even a 6 today beats a 10 you never had.',
+    detail: ['What\'s a good score? Any score you earned by actually showing up. Even a 6 today beats a 10 you never had.'],
   },
   {
     icon: '✨',
     title: 'Affirmations keep you grounded',
-    body: 'Add a few lines you want to read every day — a reminder of who you are and what you\'re working toward. They sit right at the top of your home screen.',
-    detail: 'Tap the affirmations area at the top of the app to add or edit them anytime.',
+    body: 'Add a few lines you want to read every day, a reminder of who you are and what you\'re working toward. They sit right at the top of your home screen.',
+    detail: ['Tap the affirmations area at the top of the app to add or edit them anytime.'],
   },
   {
     icon: '🔔',
     title: 'Let the app remind you',
-    body: 'Turn on daily reminders so you don\'t forget to check in. You pick the times — morning, midday, evening, whatever works for you.',
-    detail: 'Go to Settings (⚙ icon) → Daily reminder to set this up. Off by default.',
+    body: 'Turn on daily reminders so you don\'t forget to check in. You pick the times: morning, midday, evening, whatever works for you.',
+    detail: ['Go to Settings (the gear icon) and turn on Daily reminder. Off by default.'],
   },
   {
     icon: '💾',
     title: 'Back up your data',
     body: 'Everything lives only on your device. If you clear your browser or switch devices, your data is gone unless you\'ve exported it.',
-    detail: 'Go to Settings → Your data → Export backup. Do this regularly. It takes two seconds.',
+    detail: ['Go to Settings, open Your data, and tap Export backup. Do this regularly. It takes two seconds.'],
   },
 ]
 
@@ -88,8 +91,8 @@ export default function OnboardingModal({ onDone }: Props) {
     const diff = touchStartX.current - e.changedTouches[0].clientX
     touchStartX.current = null
     if (Math.abs(diff) < 50) return
-    if (diff > 0) next()              // swipe left → next
-    else if (slide > 0) setSlide(slide - 1)  // swipe right → back
+    if (diff > 0) next()
+    else if (slide > 0) setSlide(slide - 1)
   }
 
   function finish() {
@@ -124,10 +127,12 @@ export default function OnboardingModal({ onDone }: Props) {
         <div className="flex flex-col gap-3 max-w-sm">
           <h2 className="text-2xl font-bold text-ink">{s.title}</h2>
           <p className="text-ink-2 leading-relaxed">{s.body}</p>
-          {s.detail && (
-            <p className="text-sm text-ink-3 leading-relaxed border border-line rounded-xl px-4 py-3 bg-fill">
-              {s.detail}
-            </p>
+          {s.detail.length > 0 && (
+            <div className="flex flex-col gap-2 border border-line rounded-xl px-4 py-3 bg-fill">
+              {s.detail.map((line, i) => (
+                <p key={i} className="text-sm text-ink-3 leading-relaxed">{line}</p>
+              ))}
+            </div>
           )}
         </div>
       </div>
