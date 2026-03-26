@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface Props {
   onDone: () => void
@@ -27,48 +27,18 @@ export default function InstallChoice({ onDone }: Props) {
   const [showIOSSteps, setShowIOSSteps] = useState(false)
   const [showAndroidHint, setShowAndroidHint] = useState(false)
   const [needsChrome, setNeedsChrome] = useState(false)
-  const [canInstall, setCanInstall] = useState(false)
-  const deferredPrompt = useRef<(Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }) | null>(null)
-
   useEffect(() => {
     const plat = getPlatform()
     setPlatform(plat)
     if (plat === 'android' && !isChromeBrowser()) setNeedsChrome(true)
-
-    // Pick up prompt captured early in layout script (before React mounted)
-    const early = (window as unknown as Record<string, unknown>)._deferredInstallPrompt
-    if (early) {
-      deferredPrompt.current = early as typeof deferredPrompt.current
-      setCanInstall(true)
-    }
-
-    const handler = (e: Event) => {
-      e.preventDefault()
-      deferredPrompt.current = e as typeof deferredPrompt.current
-      setCanInstall(true)
-    }
-    window.addEventListener('beforeinstallprompt', handler)
-    return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
-  async function handleInstall() {
+  function handleInstall() {
     if (platform === 'ios') {
       setShowIOSSteps(true)
       return
     }
-    if (needsChrome) {
-      setShowAndroidHint(true)
-      return
-    }
-    if (deferredPrompt.current) {
-      await deferredPrompt.current.prompt()
-      deferredPrompt.current = null
-      onDone()
-      return
-    }
-    // beforeinstallprompt hasn't fired yet — show Android manual hint
     if (platform === 'android') {
-      setShowIOSSteps(false)
       setShowAndroidHint(true)
       return
     }
@@ -172,7 +142,7 @@ export default function InstallChoice({ onDone }: Props) {
   }
 
   // Always show install option on mobile; on desktop only when the browser supports it
-  const showInstallOption = platform === 'ios' || platform === 'android' || canInstall
+  const showInstallOption = platform === 'ios' || platform === 'android'
 
   return (
     <div
