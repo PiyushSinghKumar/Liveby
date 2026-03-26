@@ -16,15 +16,24 @@ function getPlatform(): Platform {
   return 'unknown'
 }
 
+function isChromeBrowser(): boolean {
+  const ua = navigator.userAgent
+  // Must have Chrome but not Chromium-based MIUI/Samsung/Opera/Edge misidentified
+  return /android/i.test(ua) && /chrome\/\d/i.test(ua) && !/miuibrowser|samsungbrowser|opr\/|edg\//i.test(ua)
+}
+
 export default function InstallChoice({ onDone }: Props) {
   const [platform, setPlatform] = useState<Platform>('unknown')
   const [showIOSSteps, setShowIOSSteps] = useState(false)
   const [showAndroidHint, setShowAndroidHint] = useState(false)
+  const [needsChrome, setNeedsChrome] = useState(false)
   const [canInstall, setCanInstall] = useState(false)
   const deferredPrompt = useRef<(Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }) | null>(null)
 
   useEffect(() => {
-    setPlatform(getPlatform())
+    const plat = getPlatform()
+    setPlatform(plat)
+    if (plat === 'android' && !isChromeBrowser()) setNeedsChrome(true)
 
     const handler = (e: Event) => {
       e.preventDefault()
@@ -38,6 +47,10 @@ export default function InstallChoice({ onDone }: Props) {
   async function handleInstall() {
     if (platform === 'ios') {
       setShowIOSSteps(true)
+      return
+    }
+    if (needsChrome) {
+      setShowAndroidHint(true)
       return
     }
     if (deferredPrompt.current) {
@@ -56,6 +69,18 @@ export default function InstallChoice({ onDone }: Props) {
   }
 
   if (showAndroidHint) {
+    const steps = needsChrome
+      ? [
+          { step: '1', text: <>Open <span className="text-ink font-medium">Chrome</span> on your device (install it from Play Store if needed)</> },
+          { step: '2', text: <>Go to <span className="text-ink font-medium select-all">liveby.vercel.app</span></> },
+          { step: '3', text: <>Tap the <span className="text-ink font-medium">three dots</span> menu ⋮ → <span className="text-ink font-medium">Add to Home screen</span></> },
+        ]
+      : [
+          { step: '1', text: <>Tap the <span className="text-ink font-medium">three dots</span> menu in Chrome ⋮</> },
+          { step: '2', text: <>Tap <span className="text-ink font-medium">Add to Home screen</span></> },
+          { step: '3', text: <>Tap <span className="text-ink font-medium">Add</span> to confirm</> },
+        ]
+
     return (
       <div
         className="fixed inset-0 z-60 flex flex-col items-center justify-between bg-bg"
@@ -68,15 +93,17 @@ export default function InstallChoice({ onDone }: Props) {
         <div className="flex flex-col items-center gap-8 px-8 text-center max-w-sm w-full">
           <div className="text-5xl">📲</div>
           <div className="flex flex-col gap-2">
-            <h2 className="text-2xl font-bold text-ink">Add to your home screen</h2>
-            <p className="text-sm text-ink-3">Using Chrome on Android</p>
+            <h2 className="text-2xl font-bold text-ink">
+              {needsChrome ? 'Open in Chrome to install' : 'Add to your home screen'}
+            </h2>
+            <p className="text-sm text-ink-3">
+              {needsChrome
+                ? 'Your current browser doesn\'t support app install — Chrome does'
+                : 'Takes 3 seconds, works like a real app'}
+            </p>
           </div>
           <div className="flex flex-col gap-3 w-full text-left">
-            {[
-              { step: '1', text: <>Tap the <span className="text-ink font-medium">three dots</span> menu in Chrome ⋮</> },
-              { step: '2', text: <>Tap <span className="text-ink font-medium">Add to Home screen</span></> },
-              { step: '3', text: <>Tap <span className="text-ink font-medium">Add</span> to confirm</> },
-            ].map(({ step, text }) => (
+            {steps.map(({ step, text }) => (
               <div key={step} className="flex items-center gap-4 bg-fill border border-line rounded-2xl px-4 py-3">
                 <span className="text-indigo-400 font-bold text-base w-4 flex-shrink-0">{step}</span>
                 <p className="text-sm text-ink-2 leading-relaxed">{text}</p>
