@@ -172,7 +172,7 @@ export default function SettingsPanel({ onClose }: Props) {
                   }`}
                   style={{
                     fontFamily:
-                      f.id === 'rounded' ? "ui-rounded, 'Hiragino Maru Gothic ProN', system-ui, sans-serif" :
+                      f.id === 'rounded' ? "var(--font-rounded), ui-rounded, 'Hiragino Maru Gothic ProN', sans-serif" :
                       f.id === 'mono' ? "ui-monospace, 'Cascadia Code', monospace" :
                       f.id === 'serif' ? "ui-serif, Georgia, serif" : undefined,
                   }}

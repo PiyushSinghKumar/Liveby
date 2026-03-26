@@ -58,7 +58,7 @@
 
 /* Font families — set on html, body inherits */
 html                { font-family: system-ui, -apple-system, sans-serif; }
-html.font-rounded   { font-family: ui-rounded, 'Hiragino Maru Gothic ProN', system-ui, sans-serif; }
+html.font-rounded   { font-family: var(--font-rounded), ui-rounded, 'Hiragino Maru Gothic ProN', sans-serif; }
 html.font-mono      { font-family: ui-monospace, 'Cascadia Code', monospace; }
 html.font-serif     { font-family: ui-serif, Georgia, 'Times New Roman', serif; }
 

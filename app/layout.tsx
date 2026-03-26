@@ -2,6 +2,9 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import config from '@/lib/config'
 import ThemeProvider from '@/components/ThemeProvider'
+import { Nunito } from 'next/font/google'
+
+const nunito = Nunito({ subsets: ['latin'], variable: '--font-rounded', display: 'swap' })
 
 export const metadata: Metadata = {
   title: config.appName,
@@ -24,7 +27,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
+    <html lang="en" className={`h-full ${nunito.variable}`} suppressHydrationWarning>
       <body className="min-h-full antialiased">
         {/* Restore font/size prefs before first paint */}
         <script dangerouslySetInnerHTML={{ __html: `
