@@ -169,6 +169,18 @@ export default function ScoreBanner({ checkins, standards, todayKey, todayChecki
                 }
               </button>
               <p className="text-[10px] text-ink-4">future {profileName || 'you'}</p>
+              <button
+                onClick={() => {
+                  const score = (lifetime ?? todayScore).toFixed(1)
+                  const text = `My Liveby score is ${score}/10 — "${level.label}". Keeping my promises one day at a time.`
+                  if (navigator.share) navigator.share({ title: 'Liveby', text })
+                  else navigator.clipboard?.writeText(text)
+                }}
+                className="ml-auto text-ink-4 hover:text-ink-2 transition text-xs"
+                title="Share your score"
+              >
+                ↗
+              </button>
             </div>
           </div>
         </div>

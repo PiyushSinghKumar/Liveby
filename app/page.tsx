@@ -13,6 +13,8 @@ import {
 } from '@/lib/storage'
 import InstallChoice from '@/components/InstallChoice'
 import SettingsPanel from '@/components/SettingsPanel'
+import { getReminderSettings, checkShouldFireReminder, showNotification, markReminderFired, applyNativeReminder, requestPermission } from '@/lib/reminder'
+import { Capacitor } from '@capacitor/core'
 import WelcomeScreen from '@/components/WelcomeScreen'
 import OnboardingModal from '@/components/OnboardingModal'
 import ProfileSetup from '@/components/ProfileSetup'
@@ -66,6 +68,42 @@ export default function Home() {
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [profile, setProfile] = useState<Profile>({ name: '' })
   useAutoBackup()
+
+  // Register service worker
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {})
+    }
+  }, [])
+
+  // On native: request permission and apply scheduled notifications on startup
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      const settings = getReminderSettings()
+      if (settings.enabled) {
+        requestPermission().then(granted => {
+          if (granted) applyNativeReminder(settings, getProfile().name || undefined)
+        })
+      }
+    }
+  }, [])
+
+  // Web fallback: check every minute if a reminder slot should fire
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) return
+    function check() {
+      const settings = getReminderSettings()
+      const key = todayKey()
+      const time = checkShouldFireReminder(settings, key)
+      if (time) {
+        showNotification(time, getProfile().name || undefined)
+        markReminderFired(time, key)
+      }
+    }
+    check()
+    const id = setInterval(check, 60_000)
+    return () => clearInterval(id)
+  }, [])
   const [modal, setModal] = useState<ModalState>(null)
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
