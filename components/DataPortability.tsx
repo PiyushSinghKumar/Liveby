@@ -38,8 +38,7 @@ async function runExport(silent = false): Promise<void> {
   }
 
   if (navigator.canShare?.({ files: [file] })) {
-    try { await navigator.share({ files: [file], title: 'Liveby Backup' }); return } catch { /* cancelled */ }
-    return
+    try { await navigator.share({ files: [file], title: 'Liveby Backup' }); return } catch { /* cancelled — fall through to download */ }
   }
 
   const url = URL.createObjectURL(blob)
