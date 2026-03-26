@@ -56,12 +56,16 @@ export default function SettingsPanel({ onClose }: Props) {
   const [size, setSize] = useState('md')
   const [reminder, setReminder] = useState<ReminderSettings>(getReminderSettings)
   const [reminderPermDenied, setReminderPermDenied] = useState(false)
+  const [isStandalone, setIsStandalone] = useState(true)
+  const [installState, setInstallState] = useState<'idle' | 'manual'>('idle')
 
   useEffect(() => {
     setMounted(true)
     setFont(getSavedFont())
     setSize(getSavedSize())
-    // reminder already initialised from useState lazy init
+    const isCapacitor = !!(window as unknown as Record<string, unknown>).Capacitor
+    const standalone = window.matchMedia('(display-mode: standalone)').matches
+    setIsStandalone(isCapacitor || standalone)
   }, [])
 
   async function handleReminderToggle() {
@@ -247,6 +251,32 @@ export default function SettingsPanel({ onClose }: Props) {
               </div>
             )}
           </div>
+
+          {!isStandalone && (
+            <div className="flex flex-col gap-2">
+              {installState === 'manual' ? (
+                <div className="flex flex-col gap-2 bg-fill border border-line rounded-2xl px-4 py-3 text-sm text-ink-2">
+                  <p className="font-medium text-ink">Install manually</p>
+                  <p>Tap the browser menu <span className="font-medium text-ink">⋮</span> → <span className="font-medium text-ink">Add to Home screen</span></p>
+                  <p className="text-ink-3 text-xs">Use Chrome for the best experience on Android.</p>
+                </div>
+              ) : (
+                <button
+                  onClick={async () => {
+                    const prompt = (window as unknown as Record<string, unknown>)._deferredInstallPrompt as ({ prompt: () => Promise<void> } | null)
+                    if (prompt) {
+                      await prompt.prompt()
+                    } else {
+                      setInstallState('manual')
+                    }
+                  }}
+                  className="w-full rounded-2xl bg-indigo-500/15 border border-indigo-400/40 text-indigo-400 font-medium py-4 transition text-sm hover:bg-indigo-500/25"
+                >
+                  Install app on this device
+                </button>
+              )}
+            </div>
+          )}
 
           <button
             onClick={onClose}
