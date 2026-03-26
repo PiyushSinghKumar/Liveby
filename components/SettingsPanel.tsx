@@ -259,7 +259,7 @@ export default function SettingsPanel({ onClose }: Props) {
               {isIOS ? (
                 <>
                   <p>Open this page in <span className="font-medium text-ink">Safari</span>, tap the Share button, then <span className="font-medium text-ink">Add to Home Screen</span>.</p>
-                  <p className="text-ink-3 text-xs">Chrome and Brave on iPhone cannot install web apps. Safari can.</p>
+                  <p className="text-ink-3 text-xs">This browser does not support installing apps on iPhone. Safari does.</p>
                 </>
               ) : (
                 <>

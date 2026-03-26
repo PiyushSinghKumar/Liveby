@@ -13,7 +13,7 @@ const SLIDES = [
     body: 'Liveby is your personal space to show up for yourself every day. No pressure, no perfection, just small promises that add up to a life you\'re proud of.',
     detail: [
       'Android: tap the three-dot menu in Chrome and tap Add to Home Screen.',
-      'iPhone: open this page in Safari, tap the Share button, then Add to Home Screen. Chrome and Brave on iPhone cannot install web apps.',
+      'iPhone: open this page in Safari, tap the Share button, then Add to Home Screen. Other browsers on iPhone do not support installing apps.',
       'Your data lives only on this device. If you switch devices, export a backup from Settings first.',
     ],
   },

@@ -134,7 +134,7 @@ export default function InstallChoice({ onDone }: Props) {
               {needsSafari ? 'Open in Safari to install' : 'Add to your home screen'}
             </h2>
             <p className="text-sm text-ink-3">
-              {needsSafari ? 'Chrome and Brave on iPhone cannot install web apps. Safari can.' : 'Three quick steps in Safari.'}
+              {needsSafari ? 'This browser does not support installing apps on iPhone. Safari does.' : 'Three quick steps in Safari.'}
             </p>
           </div>
           <div className="flex flex-col gap-3 w-full text-left">
