@@ -69,13 +69,6 @@ export default function Home() {
   const [profile, setProfile] = useState<Profile>({ name: '' })
   useAutoBackup()
 
-  // Register service worker
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {})
-    }
-  }, [])
-
   // On native: request permission and apply scheduled notifications on startup
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
