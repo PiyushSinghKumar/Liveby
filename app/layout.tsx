@@ -38,7 +38,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             navigator.serviceWorker.register('/sw.js');
           }
           window.addEventListener('beforeinstallprompt', function(e) {
-            e.preventDefault();
             window._deferredInstallPrompt = e;
           });
         `}} />
