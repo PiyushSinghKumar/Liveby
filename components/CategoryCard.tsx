@@ -1,6 +1,7 @@
 'use client'
 
 import { Category, DayCheckins } from '@/lib/types'
+import { feedbackCheck, vibrateMedium } from '@/lib/haptic'
 
 // Backward compat: map old named color IDs to hex
 const LEGACY_COLORS: Record<string, string> = {
@@ -100,7 +101,15 @@ export default function CategoryCard({
               <input
                 type="checkbox"
                 checked={checked}
-                onChange={e => onToggle(standard.id, e.target.checked)}
+                onChange={e => {
+                  feedbackCheck(checked)
+                  const next = e.target.checked
+                  onToggle(standard.id, next)
+                  if (next) {
+                    const allDone = category.standards.every(s => s.id === standard.id ? true : !!todayCheckins[s.id])
+                    if (allDone) vibrateMedium()
+                  }
+                }}
                 className="mt-0.5 w-4 h-4 rounded cursor-pointer flex-shrink-0"
                 style={{ accentColor: hex }}
               />
@@ -108,7 +117,15 @@ export default function CategoryCard({
                 className={`flex-1 text-sm leading-snug cursor-pointer select-none transition-all ${
                   checked ? 'line-through text-ink-4' : 'text-ink'
                 }`}
-                onClick={() => onToggle(standard.id, !checked)}
+                onClick={() => {
+                  feedbackCheck(checked)
+                  const next = !checked
+                  onToggle(standard.id, next)
+                  if (next) {
+                    const allDone = category.standards.every(s => s.id === standard.id ? true : !!todayCheckins[s.id])
+                    if (allDone) vibrateMedium()
+                  }
+                }}
               >
                 {standard.text}
                 {standard.type === 'soft' && (

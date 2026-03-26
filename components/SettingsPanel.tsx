@@ -7,6 +7,7 @@ import {
   requestPermission, applyNativeReminder, ReminderSettings,
 } from '@/lib/reminder'
 import { getProfile } from '@/lib/storage'
+import { getSoundEnabled, setSoundEnabled, playCheck } from '@/lib/haptic'
 
 const FONTS = [
   { id: 'default', label: 'Default', preview: 'Aa' },
@@ -58,6 +59,7 @@ export default function SettingsPanel({ onClose }: Props) {
   const [reminderPermDenied, setReminderPermDenied] = useState(false)
   const [isStandalone, setIsStandalone] = useState(true)
   const [isIOS, setIsIOS] = useState(false)
+  const [soundEnabled, setSoundEnabledState] = useState(true)
 
   useEffect(() => {
     setMounted(true)
@@ -67,6 +69,7 @@ export default function SettingsPanel({ onClose }: Props) {
     const standalone = window.matchMedia('(display-mode: standalone)').matches
     setIsStandalone(isCapacitor || standalone)
     setIsIOS(/iphone|ipad|ipod/i.test(navigator.userAgent))
+    setSoundEnabledState(getSoundEnabled())
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = '' }
   }, [])
@@ -204,6 +207,28 @@ export default function SettingsPanel({ onClose }: Props) {
                   {s.label}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Sound & haptic */}
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-ink-3 font-medium uppercase tracking-wide">Feedback</p>
+            <div className="flex items-center justify-between bg-fill border border-line rounded-2xl px-4 py-3">
+              <div className="flex flex-col gap-0.5">
+                <p className="text-sm font-medium text-ink">Sound & haptic</p>
+                <p className="text-xs text-ink-3">Tick on check-in, vibrate on Android</p>
+              </div>
+              <button
+                onClick={() => {
+                  const next = !soundEnabled
+                  setSoundEnabledState(next)
+                  setSoundEnabled(next)
+                  if (next) playCheck()
+                }}
+                className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ${soundEnabled ? 'bg-indigo-500' : 'bg-fill-3'}`}
+              >
+                <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${soundEnabled ? 'left-6' : 'left-0.5'}`} />
+              </button>
             </div>
           </div>
 
